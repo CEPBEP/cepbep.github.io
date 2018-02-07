@@ -18,7 +18,7 @@ bool isChainValid(std::vector&lt;Block&gt; &block_chain)
 
         if (current_block.get_hash() != current_block.calculate_hash())
         {
-            std::cout << " Этот хэш не валиден !<< std::endl;
+            std::cout &lt;&lt; " Этот хэш не валиден !&lt;&lt; std::endl;
             return false;
         }
 
