@@ -6,7 +6,7 @@
 
 unsigned long difficulty = 1;
 
-bool isChainValid(std::vector<Block> &block_chain)
+bool isChainValid(std::vector&lt;Block&gt; &block_chain)
 {
     std::string hash_target(new char[difficulty]);
     hash_target.replace(hash_target.begin(), hash_target.end(), '\0', '0');
