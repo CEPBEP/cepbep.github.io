@@ -1,65 +1,123 @@
 <pre>
 <code>
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include "Block.h"
+#include "Common.h"
+#include "Dagger.h"
+#include "Exceptions.h"
+#include "RLP.h"
+#include "State.h"
+#include "BlockInfo.h"
+using namespace std;
+using namespace eth;
 
-unsigned long difficulty = 1;
+BlockInfo* BlockInfo::s_genesis = nullptr;
 
-bool isChainValid(std::vector&lt;Block&gt; &block_chain)
+BlockInfo::BlockInfo(): timestamp(Invalid256)
 {
-    std::string hash_target(new char[difficulty]);
-    hash_target.replace(hash_target.begin(), hash_target.end(), '\0', '0');
-
-    for (int i = 1; i < block_chain.size(); i++)
-    {
-        Block current_block = block_chain[i];
-        Block previous_block = block_chain[i - 1];
-
-        if (current_block.get_hash() != current_block.calculate_hash())
-        {
-            std::cout &lt;&lt; " Этот хэш не валиден !&lt;&lt; std::endl;
-            return false;
-        }
-
-        if (previous_block.get_hash() != current_block.get_previous_hash())
-        {
-            std::cout << "Предыдущий хэш не валиден " << std::endl;
-            return false;
-        }
-
-        if (current_block.get_hash().substr(0, difficulty) != hash_target)
-        {
-            std::cout << "Блок не будет добавлен" << std::endl;
-            return false;
-        }
-    }
-
-    return true;
 }
 
-int main()
+BlockInfo::BlockInfo(bytesConstRef _block)
 {
-    Block first_block("Генезис", "0");
-    std::cout << "Майнинг 1..." << std::endl;
-    first_block.mine_block(difficulty);
+	populate(_block);
+}
 
-    Block second_block("+ блок", first_block.get_hash());
-    std::cout << "Майнинг 2..." << std::endl;
-    second_block.mine_block(difficulty);
+bytes BlockInfo::createGenesisBlock()
+{
+	RLPStream block(3);
+	auto sha3EmptyList = sha3(RLPEmptyList);
 
-    Block third_block("+ блок", second_block.get_hash());
-    std::cout << "Майнинг 3..." << std::endl;
-    third_block.mine_block(difficulty);
+	h256 stateRoot;
+	{
+		BasicMap db;
+		TrieDB<Address, BasicMap> state(&db);
+		state.init();
+		eth::commit(genesisState(), db, state);
+		stateRoot = state.root();
+		cout << "--- Genesis state_root=" << stateRoot << endl;
+		clog << state;
+		clog << db;
+	}
 
-    std::vector<Block> block_chain;
-    block_chain.push_back(first_block);
-    block_chain.push_back(second_block);
-    block_chain.push_back(third_block);
+	block.appendList(9) << h256() << sha3EmptyList << h160() << stateRoot << sha3EmptyList << c_genesisDifficulty << (uint)0 << string() << (uint)0;
+	block.appendRaw(RLPEmptyList);
+	block.appendRaw(RLPEmptyList);
+	return block.out();
+}
 
-    std::cout << std::endl;
-    std::cout << "Проверяем " << isChainValid(block_chain) << std::endl;
-    return 0;
+h256 BlockInfo::headerHashWithoutNonce() const
+{
+	RLPStream s;
+	fillStream(s, false);
+	return sha3(s.out());
+}
+
+void BlockInfo::fillStream(RLPStream& _s, bool _nonce) const
+{
+	_s.appendList(_nonce ? 9 : 8) << parentHash << sha3Uncles << coinbaseAddress << stateRoot << sha3Transactions << difficulty << timestamp << extraData;
+	if (_nonce)
+		_s << nonce;
+}
+
+void BlockInfo::populateGenesis()
+{
+	bytes genesisBlock = createGenesisBlock();
+	populate(&genesisBlock);
+}
+
+void BlockInfo::populate(bytesConstRef _block)
+{
+	RLP root(_block);
+	try
+	{
+		RLP header = root[0];
+		hash = eth::sha3(_block);
+		parentHash = header[0].toHash<h256>();
+		sha3Uncles = header[1].toHash<h256>();
+		coinbaseAddress = header[2].toHash<Address>();
+		stateRoot = header[3].toHash<h256>();
+		sha3Transactions = header[4].toHash<h256>();
+		difficulty = header[5].toInt<u256>();
+		timestamp = header[6].toInt<u256>();
+		extraData = header[7].toBytes();
+		nonce = header[8].toInt<u256>();
+	}
+	catch (RLP::BadCast)
+	{
+		throw InvalidBlockFormat();
+	}
+
+	// check it hashes according to proof of work or that it's the genesis block.
+	if (parentHash && !Dagger::verify(headerHashWithoutNonce(), nonce, difficulty))
+		throw InvalidNonce();
+}
+
+void BlockInfo::verifyInternals(bytesConstRef _block) const
+{
+	RLP root(_block);
+
+	if (sha3Transactions != sha3(root[1].data()))
+		throw InvalidTransactionsHash();
+
+	if (sha3Uncles != sha3(root[2].data()))
+		throw InvalidUnclesHash();
+}
+
+u256 BlockInfo::calculateDifficulty(BlockInfo const& _parent) const
+{
+	if (!parentHash)
+		return c_genesisDifficulty;
+	else
+		return timestamp >= _parent.timestamp + 42 ? _parent.difficulty - (_parent.difficulty >> 10) : (_parent.difficulty + (_parent.difficulty >> 10));
+}
+
+void BlockInfo::verifyParent(BlockInfo const& _parent) const
+{
+	// Check difficulty is correct given the two timestamps.
+	if (difficulty != calculateDifficulty(_parent))
+		throw InvalidDifficulty();
+
+	// Check timestamp is after previous timestamp.
+	if (parentHash && _parent.timestamp >= timestamp)
+		throw InvalidTimestamp();
 }
 
 </code>
