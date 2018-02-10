@@ -25,7 +25,11 @@ h1 {
     font-weight: 900;
 }
 h1#status, #t {
-    color: green;
+      color: #fff;
+    margin-top: -20px;
+    background: #000;
+    padding: 2px;
+    border: 1px solid #fe1bb1;
 }
 ::-webkit-scrollbar {
     width: 0px;
