@@ -26,7 +26,7 @@
         }      
         calculateHash()						             
         {
-            return Encrypt.SHA256(this.index + this.previousHash + this.timeStamp + this.data + this.nonce).toString();
+        return Encrypt.SHA256(this.index + this.previousHash + this.timeStamp + this.data + this.nonce).toString();
         }        
         mineBlock(difficulty)                                                                                                         
         {
