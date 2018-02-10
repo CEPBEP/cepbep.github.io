@@ -4,7 +4,7 @@
     font-family: PT Mono; 
     src: local("PT Mono"),
      url(pt-mono.ttf); 
-}html,body,pre,code{font-family: "PT Mono", sans-serif;font-weight: bolder;}
+}html,body,pre,code{font-family: "PT Mono", sans-serif;font-weight:bolder;padding:5px;border-radius:10px;}
 json#json {
     font-size: 12px;
     /*display: inline-block;*/
