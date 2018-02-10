@@ -1,0 +1,33 @@
+@import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.2/css/bulma.min.css');
+@font-face {
+    font-family: PT Mono; 
+    src: local("PT Mono"),
+     url(pt-mono.ttf); 
+}html,body,pre,code{font-family: "PT Mono", sans-serif;font-weight: bolder;}
+json#json {
+    font-size: 12px;
+    /*display: inline-block;*/
+}json#jsn {
+    font-size: 12px;
+    display: inline-block;
+}encoded, #a1 {
+    text-align: center;
+    font-size: x-small;
+    color: #ff3860;
+}
+span#hashtablehash, #hashtable_hash, #hash_table_hash {
+    color: green;
+    font-weight: 900;
+}
+h1 {
+    color: orange;
+    font-weight: 900;
+}
+h1#status, #t {
+    color: green;
+    display: inline;
+}
+::-webkit-scrollbar {
+    width: 0px;
+}
