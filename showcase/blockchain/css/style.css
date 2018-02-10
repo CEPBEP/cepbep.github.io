@@ -30,6 +30,7 @@ h1#status, #t {
     background: #000;
     padding: 2px;
     border: 1px solid #fe1bb1;
+    border-radius: 5px;
 }
 ::-webkit-scrollbar {
     width: 0px;
