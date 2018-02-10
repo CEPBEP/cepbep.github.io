@@ -150,7 +150,14 @@ class Blockchain
 }</pre>
      <h1>- [2] : В формате JSON добавляем блоки в распределенный реестр</h1>
      <h1> (соединяет все вычислительные устройства сети единой файловой системой)</h1>
-    <pre>node.files.add(new node.types.Buffer('<json id="json"></json>'), (err, filesAdded) => {
+    <pre>
+    <center style="
+    /*position: absolute;*/
+    right: 90px;
+    top: 140px;
+	    "><img src="css/world.png"/>
+	    </center>
+    node.files.add(new node.types.Buffer('<json id="json"></json>'), (err, filesAdded) => {
       if (err) {
         return console.error('ошибка')
       }
