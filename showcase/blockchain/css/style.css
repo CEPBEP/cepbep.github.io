@@ -26,11 +26,6 @@ h1 {
 }
 h1#status, #t {
     color: green;
-    display: inline;
-    margin-top: 67px;
-    position: absolute;
-    top: -55px;
-    left: 75px;
 }
 ::-webkit-scrollbar {
     width: 0px;
