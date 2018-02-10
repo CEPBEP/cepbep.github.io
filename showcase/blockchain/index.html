@@ -59,7 +59,11 @@
             </div>
           </nav>
 	    
-    <pre>class Block
+    <pre><span style="
+    color: violet;
+">class</span> <span style="
+    color: blue;
+">Block</span>
       {
         constructor(index, timeStamp, data, previousHash)
         {
@@ -136,7 +140,7 @@ class Blockchain
         
         isChainValid()
         {
-          for (var i = 1 ; i< this.chain.length ; i++)
+          for (var i = 1 ; i&lt; this.chain.length ; i++)
             {
               const currentBlock = this.chain[i];
               const previousBlock = this.chain[i-1];
@@ -179,7 +183,7 @@ class Blockchain
   
   isChainValid()
   {
-    for (var i = 1 ; i< this.chain.length ; i++)
+    for (var i = 1 ; i&lt; this.chain.length ; i++)
       {
         const currentBlock = this.chain[i];
         const previousBlock = this.chain[i-1];
