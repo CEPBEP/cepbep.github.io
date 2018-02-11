@@ -254,11 +254,34 @@ class Blockchain
       }
     }
   }
-}</pre><h1> - С помощью ключа <span id="hash_table_hash"></span> получаем обратно JSON файл с нужными блоками <br> вывод :</h1>
+}</pre><h1>- [2] : В формате JSON добавляем блоки в распределенный реестр <a href="https://ru.wikipedia.org/wiki/IPFS" target="blank">IPFS</a></h1>
+     <h1> (соединяет все вычислительные устройства сети единой файловой системой)</h1>
+    <pre>node.files.add(new node.types.Buffer('<json id="json"></json>'), (err, filesAdded) => {
+      if (err) {
+        return console.error('ошибка')
+      }
+
+      filesAdded.forEach((file) => console.log('successfully stored', file.hash))
+    })</pre>
+ 
+  <!--<h1> - 2 : полученные цепочки кладем в распределенную хэш таблицу, получаем ключ </h1>
+  <h2> (одноранговая распределенная файловая система соединяет все вычислительные устройства единой системой файлов)</h2>-->
+
+  <h1 style="font-weight:900;display: inline-block;">- [3] : получаем ключ : </h1><span id="hashtablehash"> ----</span>
+    <h1> - проверяем командой в console :</h1>
+    <pre>    node.files.cat('<span id="hashtable_hash"></span>', function (err, data) {
+        if (err) {
+          return console.error('ошибка')
+        }
+  
+        console.log(data.toString())
+      })</pre>
+    <h1> - С помощью ключа <span id="hash_table_hash"></span> получаем из распределённого хранилища JSON файл с нужными блоками <br> вывод :</h1>
   
     <pre>
      
     <json id="jsn"></json>
+    
     </pre>
  
     <script  src="js/index.js"></script>
