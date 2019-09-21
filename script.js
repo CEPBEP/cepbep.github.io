@@ -12,7 +12,7 @@ $(function() {
     url: document.location.protocol + '//api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(url),
     dataType: 'json',
     error: function() {
-      $("#feed").after("<center>Unable to load feed, Incorrect path or invalid feed</center>");
+      $("#feed").after("<center>Ошибка</center>");
     },
     success: function(xml) {
       values = xml.items;
@@ -20,7 +20,7 @@ $(function() {
       for (var i = 0, j = values.length; i < j; i++) {
         // console.log(values[i]);
 
-        $("#feed").append("<li><a href='" + values[i].link + "' target='_blank'>" + values[i].title + "</a><br><i>" + values[i].author + "</i><a href='" + values[i].link + "' class='apply'  target='_blank'>перейти</a><div>" + values[i].content + "</div></li>");
+        $("#feed").append("<li><a href='" + values[i].link + "' target='_blank'>" + values[i].title + "</a><br><i>" + values[i].author + "</i><a href='" + values[i].link + "' class='apply'  target='_blank'> перейти </a><div>" + values[i].content + "</div></li>");
       }
     }
   });
