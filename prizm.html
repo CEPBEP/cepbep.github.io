@@ -1,3 +1,23 @@
+<script>
+  $(document).ready(()=>{
+  var sh = document.querySelector('coingecko-coin-price-chart-widget').shadowRoot;
+  console.log(sh);
+  var style = document.createElement('style');
+  style.textContent = `
+.cg-container {
+  color: #FFF;
+}
+.cg-widget a {
+    color: #FFF!important;
+  }
+  .cg-container canvas {
+background: #181818!important;
+}
+  `
+  sh.appendChild(style)
+})
+</script>
+
 <center>
   <style>
     .cg-container canvas {
