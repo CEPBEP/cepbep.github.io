@@ -1,0 +1,1213 @@
+syntax = "proto2";
+package protobuf.ws;
+
+// Subscription to ticker - public api
+message SubscribeTickerChannelRequest {
+    // SUBSCRIBE_TICKER
+    required string currency_pair = 1;
+
+    // send rate will be limited to one message per frequency seconds. Minimum frequency is 0.1
+    // if omitted, rate is not limited (you will get all changes just in time)
+    optional float frequency = 2;
+}
+
+// Subscription to orderbook changes - public api
+message SubscribeOrderBookRawChannelRequest {
+    // SUBSCRIBE_ORDER_BOOK_RAW
+    required string currency_pair = 1;
+
+    // depth of orderbook, which will be sent in an subscription answer
+    // 0 meens 'do not send orderbook snapshot'
+    // if omitted, full orderbook snaphot will be sent
+    optional int32 depth = 2;
+}
+
+// Subscription to orderbook (grouped by price) changes - public api
+message SubscribeOrderBookChannelRequest {
+    // SUBSCRIBE_ORDER_BOOK
+    required string currency_pair = 1;
+
+    // depth of orderbook, which will be sent in an subscription answer
+    // 0 meens 'do not send orderbook snapshot'
+    // if omitted, full orderbook snaphot will be sent
+    optional int32 depth = 2;
+}
+
+// Subscription to trades - public api
+message SubscribeTradeChannelRequest {
+    // SUBSCRIBE_TRADE
+    required string currency_pair = 1;
+}
+
+
+// Subscription to candles (OHLCV) - public api
+message SubscribeCandleChannelRequest {
+    // SUBSCRIBE_CANDLE
+    enum CandleInterval {
+        CANDLE_1_MINUTE = 1; // yes, onle 1-minute candles for now :(
+    }
+    required string currency_pair = 1;
+    required CandleInterval interval = 2;
+
+    // amount of historical candles to send in answer, 240 is maximum value
+    // default is not to send historical candles at all
+    optional int32 depth = 3 [default=0];
+}
+
+// Unsubscribe from channel
+message UnsubscribeRequest {
+    // UNSUBSCRIBE
+    enum ChannelType {
+        TICKER = 1;
+        ORDER_BOOK_RAW = 2;
+        ORDER_BOOK = 3;
+        TRADE = 4;
+        CANDLE = 5;
+    }
+    required ChannelType channel_type = 1;
+    required string currency_pair = 2;
+}
+
+message RequestExpired {
+    required int64 now = 1;
+    required int32 ttl = 2;
+}
+
+// Login request - private api
+message LoginRequest {
+    // LOGIN
+    required RequestExpired expire_control = 1;
+    required string api_key = 2;
+}
+
+// Put limit order request - private api, you have to be logged in
+// Weight is 1 point
+message PutLimitOrderRequest {
+    // PUT_LIMIT_ORDER
+    enum OrderType {
+        BID = 1; // if you want to buy
+        ASK = 2; // if you want to sell
+    }
+    required RequestExpired expire_control = 1;
+    required string currency_pair = 2;
+    required OrderType order_type = 3;
+    required string amount = 4;
+    required string price = 5;
+}
+
+// Weight is 1 point
+message CancelLimitOrderRequest {
+    // CANCEL_LIMIT_ORDER
+    required RequestExpired expire_control = 1;
+    required string currency_pair = 2;
+
+    // id of the order to cancel
+    required int64 id = 3;
+}
+
+// Weight is 1 point
+message BalanceRequest {
+    // BALANCE
+    required RequestExpired expire_control = 1;
+    required string currency = 2;
+}
+
+// Weight is 1 point when currency is given, 5 points for "all currencies"
+message BalancesRequest {
+    // BALANCES
+    required RequestExpired expire_control = 1;
+    optional string currency = 2;
+    optional bool only_not_zero = 3;
+}
+
+// Weight is 1 point when interval == MINUTE, 5 points when interval == HOUR
+message LastTradesRequest{
+    // LAST_TRADES
+    enum TradeType {
+        SELL = 1;
+        BUY = 2;
+    }
+    enum Interval {
+        MINUTE = 1;
+        HOUR = 2;
+    }
+    required RequestExpired expire_control = 1;
+    required string currency_pair = 2;
+    optional Interval interval = 3;
+    optional TradeType trade_type = 4;
+}
+
+
+// Weight is 1 point when currency is given, 5 points for "all currencies"
+message TradesRequest{
+    // TRADES
+
+    enum Direction {
+        ASC = 1;
+        DESC = 2;
+    }
+
+    required RequestExpired expire_control = 1;
+    optional string currency_pair = 2;
+    optional Direction direction = 3;
+    optional int32 offset = 4;
+    optional int32 limit = 5;
+}
+
+// Weight is 1 point when currency is given, 5 points for "all currencies"
+message ClientOrdersRequest{
+    // CLIENT_ORDERS
+    enum OrderStatus{
+        OPEN = 1;
+        CLOSED = 2;
+        CANCELLED = 4;
+        PARTIALLY = 5;
+        NOT_CANCELLED = 6;
+    }
+    enum OrderType{
+        BID = 1; // if you want to buy
+        ASK = 2; // if you want to sell
+    }
+    required RequestExpired expire_control = 1;
+    optional string currency_pair = 2;
+    optional OrderStatus status = 3;
+    optional int64 issued_from = 4;
+    optional int64 issued_to = 5;
+    optional OrderType order_type = 6;
+    optional int32 start_row = 7;
+    optional int32 end_row = 8;
+}
+
+message ClientOrderRequest {
+    // CLIENT_ORDER
+    required RequestExpired expire_control = 1;
+    required int64 order_id = 2;
+    required string currency_pair = 3;
+}
+
+message CommissionRequest {
+    // COMMISSION
+    required RequestExpired expire_control = 1;
+}
+
+message CommissionCommonInfoRequest {
+    // COMMISSION_COMMON_INFO
+    required RequestExpired expire_control = 1;
+}
+
+message TradeHistoryRequest {
+    // TRADE_HISTORY
+    enum Types {
+        BUY = 1;
+        SELL = 2;
+        DEPOSIT = 3;
+        WITHDRAWAL = 4;
+        BET = 5;
+        RETRIEVE = 6;
+        PRIZE = 7;
+        REFERRAL_BET = 8;
+        REFERRAL = 9;
+        DEPOSIT_VOUCHER = 10;
+        WITHDRAWAL_VOUCHER = 11;
+    }
+    required RequestExpired expire_control = 1;
+    required int64 start = 2;
+    required int64 end = 3;
+    repeated Types types = 4;
+    optional int32 limit = 5;
+    optional int32 offset = 6;
+}
+
+message MarkerOrderRequest {
+    // MARKET_ORDER
+    required RequestExpired expire_control = 1;
+    required string currency_pair = 2;
+    required string amount = 3;
+    required ClientOrdersRequest.OrderType orderType = 4;
+}
+
+message WalletAddressRequest {
+    //WALLET_ADDRESS
+    required RequestExpired expire_control = 1;
+    required string currency = 2;
+}
+
+message WithdrawalCoinRequest {
+    //WITHDRAWAL_COIN
+    required RequestExpired expire_control = 1;
+    required string wallet = 2;
+    required string currency = 3;
+    required string amount = 4;
+    optional string description = 5;
+}
+
+message WithdrawalPayeerRequest {
+    //WITHDRAWAL_PAYEER
+    required RequestExpired expire_control = 1;
+    required string wallet = 2;
+    required string currency = 3;
+    required string amount = 4;
+    optional string protect = 5;
+    optional int32 protectPeriod = 6;
+    optional string protectCode = 7;
+}
+
+message WithdrawalCapitalistRequest {
+    //WITHDRAWAL_CAPITALIST
+    required RequestExpired expire_control = 1;
+    required string wallet = 2;
+    required string currency = 3;
+    required string amount = 4;
+}
+
+message WithdrawalAdvcashRequest {
+    //WITHDRAWAL_ADVCASH
+    required RequestExpired expire_control = 1;
+    required string wallet = 2;
+    required string currency = 3;
+    required string amount = 4;
+}
+
+message WithdrawalYandexRequest {
+    //WITHDRAWAL_YANDEX
+    required RequestExpired expire_control = 1;
+    required string wallet = 2;
+    required string currency = 3;
+    required string amount = 4;
+}
+
+message WithdrawalQiwiRequest {
+    //WITHDRAWAL_QIWI
+    required RequestExpired expire_control = 1;
+    required string wallet = 2;
+    required string currency = 3;
+    required string amount = 4;
+}
+
+message WithdrawalCardRequest {
+    //WITHDRAWAL_CARD
+    required RequestExpired expire_control = 1;
+    required string account = 2;
+    required string currency = 3;
+    required string amount = 4;
+}
+
+message WithdrawalMastercardRequest {
+    //WITHDRAWAL_MASTERCARD
+    required RequestExpired expire_control = 1;
+    required string currency = 2;
+    required string amount = 3;
+    required string card_number = 4;
+    required string card_holder = 5;
+    required string card_holder_country = 6;
+    required string card_holder_city = 7;
+    required string card_holder_dob = 8;
+    required string card_holder_mobile_phone = 9;
+}
+
+message WithdrawalPerfectMoneyRequest {
+    //WITHDRAWAL_PERFECTMONEY
+    required RequestExpired expire_control = 1;
+    required string wallet = 2;
+    required string currency = 3;
+    required string amount = 4;
+    optional string protect_code = 5;
+    optional int32 protect_period = 6;
+}
+
+message VoucherMakeRequest {
+    //VOUCHER_MAKE
+    required RequestExpired expire_control = 1;
+    required string description = 2;
+    required string currency = 3;
+    required string amount = 4;
+    optional string for_user = 5;
+}
+
+message VoucherAmountRequest {
+    //VOUCHER_AMOUNT
+    required RequestExpired expire_control = 1;
+    required string voucher_code = 2;
+}
+
+message VoucherRedeemRequest {
+    //VOUCHER_REDEEM
+    required RequestExpired expire_control = 1;
+    required string voucher_code = 2;
+}
+
+message CancelOrdersRequest {
+    //CANCEL_ORDERS
+    required RequestExpired expire_control = 1;
+    repeated string currency_pairs = 2;
+}
+
+message PingRequest {
+
+}
+
+message TickerEvent {
+    required int64  timestamp = 1;
+    optional string last = 2;
+    optional string high = 3;
+    optional string low = 4;
+    optional string volume = 5;
+    optional string vwap = 6;
+    optional string max_bid = 7;
+    optional string min_ask = 8;
+    optional string best_bid = 9;
+    optional string best_ask = 10;
+}
+
+message TickerChannelSubscribedResponse {
+    // TICKER_CHANNEL_SUBSCRIBED
+    required string currency_pair = 1;
+    repeated TickerEvent data = 2;
+}
+
+message OrderBookRawEvent {
+    enum OrderType {
+        BID = 1;
+        ASK = 2;
+    }
+    required OrderType order_type = 1 [default = BID];
+    required int64 id = 2;
+
+    // timestamp of the last order's change
+    required int64 timestamp = 3;
+    optional string price = 4;
+
+    // zero when order is removed from orderbook (cancelled or traded)
+    required string quantity = 5;
+}
+
+message OrderBookRawChannelSubscribedResponse {
+    // ORDER_BOOK_RAW_CHANNEL_SUBSCRIBED
+    required string currency_pair = 1;
+
+    // current snapshot of orderbook. It is guaranted that all notifications will be from this snapshot.
+    repeated OrderBookRawEvent data = 2;
+}
+
+message OrderBookEvent {
+    enum OrderType {
+        BID = 1;
+        ASK = 2;
+    }
+    required OrderType order_type = 1 [default = BID];
+    required int64 timestamp = 2;
+
+    // zero when order is removed from orderbook (cancelled or traded)
+    required string price = 3;
+    required string quantity = 4;
+}
+
+message OrderBookChannelSubscribedResponse {
+    // ORDER_BOOK_CHANNEL_SUBSCRIBED
+    required string currency_pair = 1;
+
+    // current snapshot of orderbook. It is guaranted that all notifications will be from this snapshot.
+    repeated OrderBookEvent data = 2;
+}
+
+message TradeEvent {
+    enum TradeType {
+        BUY = 1;
+        SELL = 2;
+    }
+    required int64 id = 1;
+    required TradeType trade_type = 2 [default = BUY];
+    required int64 timestamp = 3;
+    required string price = 4;
+    required string quantity = 5;
+    optional int64 order_buy_id = 6;
+    optional int64 order_sell_id = 7;
+}
+
+message TradeChannelSubscribedResponse {
+    // TRADE_CHANNEL_SUBSCRIBED
+    required string currency_pair = 1;
+    repeated TradeEvent data = 2;
+}
+
+message CandleEvent {
+    // timestamp of interval start
+    required int64 timestamp = 1;
+    required string open_price = 2;
+    required string close_price = 3;
+    required string high_price = 4;
+    required string low_price = 5;
+    required string volume = 6;
+    required string quoted_volume = 7;
+}
+
+message CandleChannelSubscribedResponse {
+    // CANDLE_CHANNEL_SUBSCRIBED
+    required string currency_pair = 1;
+    required SubscribeCandleChannelRequest.CandleInterval interval = 2;
+    repeated CandleEvent data = 3;
+}
+
+message ChannelUnsubscribedResponse {
+    // CHANNEL_UNSUBSCRIBED
+    required UnsubscribeRequest.ChannelType type = 1;
+    required string currency_pair = 2;
+}
+
+message ErrorResponse {
+    // ERROR
+    required int32 code = 1;
+    required string message = 2;
+}
+
+message TickerNotification {
+    // TICKER_NOTIFY
+    required string currency_pair = 1;
+    repeated TickerEvent data = 2;
+}
+
+message OrderBookRawNotification {
+    // ORDER_BOOK_RAW_NOTIFY
+    required string currency_pair = 1;
+    repeated OrderBookRawEvent data = 2;
+}
+
+message OrderBookNotification {
+    // ORDER_BOOK_NOTIFY
+    required string currency_pair = 1;
+    repeated OrderBookEvent data = 2;
+}
+
+message TradeNotification {
+    // TRADE_NOTIFY
+    required string currency_pair = 1;
+    repeated TradeEvent data = 2;
+}
+
+message CandleNotification {
+    // CANDLE_NOTIFY
+    required string currency_pair = 1;
+    required SubscribeCandleChannelRequest.CandleInterval interval = 2;
+    repeated CandleEvent data = 3;
+}
+
+message LoginResponse {
+    // LOGIN_RESPONSE
+}
+
+message PutLimitOrderResponse {
+    // PUT_LIMIT_ORDER_RESPONSE
+    required int64  order_id = 1;
+
+    // quantity not traded yet.
+    // when your order has been fully traded when you put it, this field will be zero
+    // when your order has not been traded at all when you put it, this field will be original order's quantity
+    // when your order has been partially traded when you put it, this field will be the quantity left in orderbook
+    required string amount_left = 2;
+}
+
+message CancelLimitOrderResponse {
+    // CANCEL_LIMIT_ORDER_RESPONSE
+    required int64  order_id = 1;
+
+    // quantity not traded yet. Never can be zero :)
+    required string amount_left = 2;
+}
+
+message BalanceResponse {
+    // BALANCE_RESPONSE
+    enum BalanceType {
+        TOTAL = 1;
+        AVAILABLE = 2;
+        AVAILABLE_WITHDRAWAL = 3;
+        TRADE = 4;
+    }
+    required BalanceType type = 1;
+    required string currency = 2;
+    required string value = 3;
+}
+
+message BalancesResponse {
+    // BALANCES_RESPONSE
+    repeated BalanceResponse balances = 1;
+}
+
+message LastTradesResponse {
+    // LAST_TRADES_RESPONSE
+    repeated TradeEvent trades = 1;
+}
+
+message Trade {
+    required int64 id = 1;
+    required TradeEvent.TradeType trade_type = 2 [default = BUY];
+    required int64 timestamp = 3;
+    required string currency_pair = 4;
+    required string price = 5;
+    required string quantity = 6;
+    required string commission = 7;
+    required string bonus = 8;
+}
+
+message TradesResponse {
+    // TRADES_RESPONSE
+    repeated Trade trades = 1;
+}
+
+message Order {
+    enum OrderType {
+        MARKET_BUY = 1;
+        MARKET_SELL = 2;
+        LIMIT_BUY = 3;
+        LIMIT_SELL = 4;
+        UNKNOWN_TYPE = 5;
+        MARKET_BUY_IN_FULL_AMOUNT = 6;
+    }
+    enum OrderStatus {
+        NEW = 1;
+        OPEN = 2;
+        EXPIRED = 3;
+        CANCELLED = 4;
+        EXECUTED = 5;
+        PARTIALLY_FILLED = 6;
+        PARTIALLY_FILLED_AND_CANCELLED = 7;
+        PARTIALLY_FILLED_AND_EXPIRED = 8;
+        UNKNOWN_STATUS = 9;
+    }
+    required int64 id = 1;
+    required string currency_pair = 2;
+    required int64 good_until_time = 3;
+    required OrderType order_type = 4;
+    required OrderStatus order_status = 5;
+    required int64 issue_time = 6;
+    optional string price = 7;
+    required string quantity = 8;
+    required string remaining_quantity = 9;
+    required string commission_by_trade = 10;
+    required string bonus_by_trade = 11;
+    required string bonus_rate = 12;
+    required string commission_rate = 13;
+    required int64 last_modification_time = 14;
+}
+
+message ClientOrdersResponse {
+    // CLIENT_ORDERS_RESPONSE
+    required int32 totalRows = 1;
+    required int32 startRow = 2;
+    required int32 endRow = 3;
+    repeated Order orders = 4;
+}
+
+message Trades {
+    required int32 trades = 1;
+    required string amount = 2;
+    required string quantity = 3;
+    required string avg_price = 4;
+    required string commission = 5;
+    required string bonus = 6;
+}
+
+message ClientOrderResponse {
+    // CLIENT_ORDER_RESPONSE
+    required int64 id = 1;
+    required Order.OrderStatus order_status = 2;
+    required string currencyPair = 3;
+    required string price = 4;
+    required string quantity = 5;
+    required string remaining_quantity = 6;
+    required string blocked = 7;
+    required string blocked_remain = 8;
+    required string commission_rate = 9;
+    optional Trades trades = 10;
+}
+
+message CommissionResponse {
+    // COMMISSION_RESPONSE
+    required string value = 1;
+}
+
+message CommissionCommonInfoResponse {
+    // COMMISSION_COMMON_INFO_RESPONSE
+    required string commission = 1;
+    required string last30_days_amount_as_usd = 2;
+}
+
+message TradeHistory {
+    required string id = 1;
+    required TradeHistoryRequest.Types trade_type = 2;
+    required int64 date = 3;
+    required string amount = 4;
+    required string fee = 5;
+    required string fixed_currency = 6;
+    required string tax_currency = 7;
+    required string variable_amount = 8;
+    required string variable_currency = 9;
+    optional string external = 10;
+    required string login = 11;
+    required string external_key = 12;
+}
+
+message TradeHistoryResponse {
+    // TRADE_HISTORY_RESPONSE
+    repeated TradeHistory data = 1;
+    required int64 total = 2;
+}
+
+message MarkerOrderResponse {
+    // MARKET_ORDER_RESPONSE
+    required int64  order_id = 1;
+
+    // quantity not traded yet.
+    // when your order has been fully traded when you put it, this field will be zero
+    // when your order has not been traded at all when you put it, this field will be original order's quantity
+    // when your order has been partially traded when you put it, this field will be the quantity left in orderbook
+    required string amount_left = 2;
+}
+
+message WalletAddressResponse {
+    required string wallet_address = 1;
+    required string wallet_currency = 2;
+}
+
+message WithdrawalCoinResponse {
+    enum State{
+        NEW = 1;
+        SAVED = 2;
+        RECEIVED = 3;
+        VERIFIED = 4;
+        INPROCESS = 5;
+        PREAPPROVED = 6;
+        APPROVED = 7;
+        READY_FOR_EXECUTION = 8;
+        ONEXECUTION = 9;
+        EXECUTED = 10;
+        DECLINED = 11;
+        POSTPONED = 12;
+    }
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional int64 verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string wallet = 14;
+}
+
+message WithdrawalPayeerResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    required string to = 26;
+    optional string protect = 27;
+    optional int32 protectPeriod = 28;
+    optional string protectCode = 29;
+}
+
+message WithdrawalCapitalistResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    required string toAccount = 26;
+}
+
+message WithdrawalAdvcashResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    required string toAccount = 26;
+}
+
+message WithdrawalYandexResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    optional string txId = 26;
+    required string toAccount = 27;
+}
+
+message WithdrawalQiwiResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    optional string txId = 26;
+    required string toAccount = 27;
+}
+
+message WithdrawalCardResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    optional string txId = 26;
+    required string toAccount = 27;
+}
+
+message WithdrawalMastercardResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    optional string txId = 26;
+    required string toAccount = 27;
+}
+
+message WithdrawalPerfectMoneyResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    required int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+    required string receiver = 26;
+    optional string code = 27;
+    optional int32 period = 28;
+
+}
+message VoucherMakeResponse {
+    required string voucher_code = 1;
+}
+
+message VoucherAmountResponse {
+    required string voucher_amount = 1;
+}
+
+message VoucherRedeemResponse {
+    optional string fault = 1;
+    required int64 user_id = 2;
+    required string user_name = 3;
+    required int64 id = 4;
+    required WithdrawalCoinResponse.State state = 5;
+    required int64 create_date = 6;
+    required int64 last_modify_date = 7;
+    optional string verification_type = 8;
+    optional string verification_data = 9;
+    optional string comment = 10;
+    required string description = 11;
+    required string amount = 12;
+    required string currency = 13;
+    required string account_to = 14;
+    optional int64 acceptDate = 15;
+    optional int64 valueDate = 16;
+    required int64 docDate = 17;
+    required string docNumber = 18;
+    optional string correspondentDetails = 19;
+    required string accountFrom = 20;
+    required bool outcome = 21;
+    optional string external = 22;
+    required string externalKey = 23;
+    optional int64 externalSystemId = 24;
+    optional int64 externalServiceId = 25;
+}
+
+message OrderCancelled{
+    required int64 id = 1;
+    required string oq = 2;
+    required string tq = 3;
+}
+
+message CancelOrdersResponse{
+    repeated OrderCancelled orders = 1;
+}
+
+
+// Subscription to orderbook changes - private api
+message PrivateSubscribeOrderRawChannelRequest {
+    // PRIVATE_SUBSCRIBE_ORDER_RAW
+    enum SubscribeType {
+        ONLY_EVENTS = 1;
+        WITH_INITIAL_STATE = 2;
+    }
+    required RequestExpired expire_control = 1;
+    required SubscribeType subscribe_type = 2 [default = ONLY_EVENTS];
+}
+
+message PrivateOrderRawNotification {
+    // PRIVATE_ORDER_RAW_NOTIFY
+    repeated PrivateOrderRawEvent data = 1;
+}
+
+message PrivateOrderRawChannelSubscribedResponse {
+    // PRIVATE_ORDER_RAW_CHANNEL_SUBSCRIBED
+    repeated PrivateOrderRawEvent data = 1;
+}
+
+
+message PrivateOrderRawEvent {
+    enum OrderType {
+        BID = 1;
+        ASK = 2;
+    }
+    required OrderType order_type = 1 [default = BID];
+    required int64 id = 2;
+
+    // timestamp of the last order's change
+    required int64 timestamp = 3;
+    optional string price = 4;
+
+    // zero when order is removed from orderbook (cancelled or traded)
+    required string quantity = 5;
+    required string currency_pair = 6;
+    required bool is_market = 7;
+    required string quantity_left_before_cancellation = 8;
+}
+
+
+// Subscription to trades - private api
+message PrivateSubscribeTradeChannelRequest {
+    // PRIVATE_SUBSCRIBE_TRADE
+    required RequestExpired expire_control = 1;
+}
+
+message PrivateTradeChannelSubscribedResponse {
+    // TRADE_CHANNEL_SUBSCRIBED
+    repeated PrivateTradeEvent data = 1;
+}
+
+message PrivateTradeNotification {
+    // PRIVATE_TRADE_NOTIFY
+    repeated PrivateTradeEvent data = 1;
+}
+
+message PrivateTradeEvent {
+    enum TradeType {
+        BUY = 1;
+        SELL = 2;
+    }
+    required int64 id = 1;
+    required TradeType trade_type = 2 [default = BUY];
+    required int64 timestamp = 3;
+    required string price = 4;
+    required string quantity = 5;
+    optional int64 order_buy_id = 6;
+    optional int64 order_sell_id = 7;
+    required string currency_pair = 8;
+}
+
+// Unsubscribe from channel
+message PrivateUnsubscribeRequest {
+    // PRIVATE_UNSUBSCRIBE
+    enum ChannelType {
+        PRIVATE_ORDER_RAW = 1;
+        PRIVATE_TRADE = 2;
+        PRIVATE_CHANGE_BALANCE = 3;
+    }
+    required RequestExpired expire_control = 1;
+    required ChannelType channel_type = 2;
+}
+
+message PrivateChannelUnsubscribedResponse {
+    // PRIVATE_CHANNEL_UNSUBSCRIBED
+    required PrivateUnsubscribeRequest.ChannelType type = 1;
+}
+
+message PrivateSubscribeBalanceChangeChannelRequest {
+    //SUBSCRIBE_BALANCE_CHANGE
+    required RequestExpired expire_control = 1;
+}
+
+message PrivateChangeBalanceChannelSubscribedResponse {
+    //BALANCE_CHANGE_CHANNEL_SUBSCRIBED
+    repeated BalanceResponse data = 1;
+}
+
+message PrivateChangeBalanceNotification {
+    //BALANCE_CHANGE_NOTIFY
+    repeated BalanceResponse data = 1;
+}
+
+message PongResponse {
+    //  time of received ping
+    required int64 ping_time = 1;
+}
+
+message WsRequestMetaData {
+    enum WsRequestMsgType {
+        SUBSCRIBE_TICKER = 1;
+        SUBSCRIBE_ORDER_BOOK_RAW = 2;
+        SUBSCRIBE_ORDER_BOOK = 3;
+        SUBSCRIBE_TRADE = 4;
+        SUBSCRIBE_CANDLE = 5;
+        UNSUBSCRIBE = 6;
+        LOGIN = 7;
+        PUT_LIMIT_ORDER = 8;
+        CANCEL_LIMIT_ORDER = 9;
+        BALANCE = 10;
+        BALANCES = 11;
+        LAST_TRADES = 12;
+        TRADES = 13;
+        CLIENT_ORDERS = 14;
+        CLIENT_ORDER = 15;
+        COMMISSION = 16;
+        COMMISSION_COMMON_INFO = 17;
+        TRADE_HISTORY = 18;
+        MARKET_ORDER = 19;
+        WALLET_ADDRESS = 20;
+        WITHDRAWAL_COIN = 21;
+        WITHDRAWAL_PAYEER = 22;
+        WITHDRAWAL_CAPITALIST = 23;
+        WITHDRAWAL_ADVCASH = 24;
+        PRIVATE_SUBSCRIBE_ORDER_RAW = 25;
+        PRIVATE_SUBSCRIBE_TRADE = 26;
+        PRIVATE_UNSUBSCRIBE = 27;
+        WITHDRAWAL_YANDEX = 28;
+        WITHDRAWAL_QIWI = 29;
+        WITHDRAWAL_CARD = 30;
+        WITHDRAWAL_MASTERCARD = 31;
+        WITHDRAWAL_PERFECTMONEY = 32;
+        VOUCHER_MAKE = 33;
+        VOUCHER_AMOUNT = 34;
+        VOUCHER_REDEEM = 35;
+        CANCEL_ORDERS = 36;
+        PING_REQUEST = 37;
+        SUBSCRIBE_BALANCE_CHANGE = 38;
+    }
+    required WsRequestMsgType request_type = 1;
+    optional string token = 2;
+    optional string deprecatedSign = 3; // deprecated, do not use
+    optional bytes sign = 4;
+}
+
+message WsResponseMetaData {
+    enum WsResponseMsgType {
+        TICKER_CHANNEL_SUBSCRIBED = 1;
+        ORDER_BOOK_RAW_CHANNEL_SUBSCRIBED = 2;
+        ORDER_BOOK_CHANNEL_SUBSCRIBED = 3;
+        TRADE_CHANNEL_SUBSCRIBED = 4;
+        CANDLE_CHANNEL_SUBSCRIBED = 5;
+        CHANNEL_UNSUBSCRIBED = 6;
+        ERROR = 7;
+        TICKER_NOTIFY = 8;
+        ORDER_BOOK_RAW_NOTIFY = 9;
+        ORDER_BOOK_NOTIFY = 10;
+        TRADE_NOTIFY = 11;
+        CANDLE_NOTIFY = 12;
+        LOGIN_RESPONSE = 13;
+        PUT_LIMIT_ORDER_RESPONSE = 14;
+        CANCEL_LIMIT_ORDER_RESPONSE = 15;
+        BALANCE_RESPONSE = 16;
+        BALANCES_RESPONSE = 17;
+        LAST_TRADES_RESPONSE = 18;
+        TRADES_RESPONSE = 19;
+        CLIENT_ORDERS_RESPONSE = 20;
+        CLIENT_ORDER_RESPONSE = 21;
+        COMMISSION_RESPONSE = 22;
+        COMMISSION_COMMON_INFO_RESPONSE = 23;
+        TRADE_HISTORY_RESPONSE = 24;
+        MARKET_ORDER_RESPONSE = 25;
+        WALLET_ADDRESS_RESPONSE = 26;
+        WITHDRAWAL_COIN_RESPONSE = 27;
+        WITHDRAWAL_PAYEER_RESPONSE = 28;
+        WITHDRAWAL_CAPITALIST_RESPONSE = 29;
+        WITHDRAWAL_ADVCASH_RESPONSE = 30;
+        PRIVATE_ORDER_RAW_CHANNEL_SUBSCRIBED = 31;
+        PRIVATE_TRADE_CHANNEL_SUBSCRIBED = 32;
+        PRIVATE_ORDER_RAW_NOTIFY = 33;
+        PRIVATE_TRADE_NOTIFY = 34;
+        PRIVATE_CHANNEL_UNSUBSCRIBED = 35;
+        WITHDRAWAL_YANDEX_RESPONSE = 36;
+        WITHDRAWAL_QIWI_RESPONSE = 37;
+        WITHDRAWAL_CARD_RESPONSE = 38;
+        WITHDRAWAL_MASTERCARD_RESPONSE = 39;
+        WITHDRAWAL_PERFECTMONEY_RESPONSE = 40;
+        VOUCHER_MAKE_RESPONSE = 41;
+        VOUCHER_AMOUNT_RESPONSE = 42;
+        VOUCHER_REDEEM_RESPONSE = 43;
+        CANCEL_ORDERS_RESPONSE = 44;
+        PONG_RESPONSE = 45;
+        BALANCE_CHANGE_CHANNEL_SUBSCRIBED = 46;
+        BALANCE_CHANGE_NOTIFY = 47;
+    }
+    required WsResponseMsgType response_type = 1;
+    optional string token = 2;
+}
+
+message WsRequest {
+    required WsRequestMetaData meta = 1;
+
+    // serialized request message
+    required bytes msg = 2;
+}
+
+message WsResponse {
+    required WsResponseMetaData meta = 1;
+
+    // serialized response message
+    required bytes msg = 2;
+}
