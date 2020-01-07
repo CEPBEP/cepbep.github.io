@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+	<!--
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	-->
+
+	<title>ascii camera</title>
+	<meta charset="utf-8" />
+	 <link rel="stylesheet" href="css/main.css"/>
+	 <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+	<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+	<h1 id="info"></h1>
+
+	<div id="notSupported">
+		<h1>Your browser does not support the Camera API.</h1>
+		<img src="images/screenshot.png" align="center" />
+	</div>
+
+	<pre id="ascii"></pre>
+	<button id="button"><div style="    background-image: url(video.svg);
+		height: 95px;
+		width: 95px;
+		background-repeat: no-repeat;
+		position: relative;
+		top: 45vh;"></div></button>
+
+
+
+	<script src="script/camera.js"></script>
+	<script src="script/ascii.js"></script>
+	<script src="script/app.js"></script>
+</body>
+</html>
