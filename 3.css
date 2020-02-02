@@ -287,12 +287,12 @@ body {
 }
 
 .switch-led-green:after {
-	content: 'ON';
+	content: 'ВКЛ';
 	top: -1.8em;
 }
 
 .switch-led-red:after {
-	content: 'OFF';
+	content: 'ВЫКЛ';
 	bottom: -1.8em;
 }
 
