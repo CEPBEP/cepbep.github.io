@@ -1,9 +1,7 @@
-body {
-	font-family: arial, verdana, sans-serif;
+body {font-family: arial, verdana, sans-serif;
 	font-size: 8px;
 	background: #1E1E20;
-	text-align: center;
-}
+	text-align: center;}
 
 .switch {
 	display: inline-block;
