@@ -2,7 +2,7 @@ body {font-family: arial, verdana, sans-serif;
 	font-size: 8px;
 	background: #1E1E20;
 	text-align: center;margin:0;}
-iframe#frame {position: absolute;border: 0;width: 100%;padding: 0;margin: 0;left: 0;height: 25%;}
+iframe#frame {position: absolute;border: 0;width: 100%;padding: 0;margin: 0;left: 0;height: 100%;}
 .switch {display: inline-block;
 	margin: 10em 50em;
 	position: relative;
@@ -10,6 +10,7 @@ iframe#frame {position: absolute;border: 0;width: 100%;padding: 0;margin: 0;left
 	-webkit-box-shadow: 0 0 0.5em rgba(255,255,255,0.2);
 	-moz-box-shadow: 0 0 0.5em rgba(255,255,255,0.2);
 	box-shadow: 0 0 0.5em rgba(255,255,255,0.2);
+	box-shadow: 0 0 7em 20px rgb(0, 0, 0);
 	    top: 30vh;
 }
 .switch label {
