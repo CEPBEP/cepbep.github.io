@@ -290,6 +290,7 @@ iframe#frame {position: absolute;border: 0;width: 100%;padding: 0;margin: 0;left
 	position: absolute;
 	left: 0;
 	color: #ffffff;
+	font-size: 2em;
 	font-family: arial, verdana, sans-serif;
 	font-weight: bold;
 	text-align: center;
