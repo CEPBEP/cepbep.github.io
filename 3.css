@@ -20,7 +20,7 @@ iframe#frame {position: absolute;border: 0;width: 100%;padding: 0;margin: 0;left
     visibility: visible;
     border-radius: 15.5em;
     top: 30vh;
-    z-index: 35;
+    z-index:1;
     background: #0000007a;
     width: 60%;
     height: 20%;
