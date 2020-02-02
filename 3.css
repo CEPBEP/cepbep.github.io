@@ -3,8 +3,7 @@ body {font-family: arial, verdana, sans-serif;
 	background: #1E1E20;
 	text-align: center;margin:0;}
 iframe#frame {position: absolute;border: 0;width: 100%;padding: 0;margin: 0;left: 0;height: 25%;}
-.switch {
-	display: inline-block;
+.switch {display: inline-block;
 	margin: 10em 50em;
 	position: relative;
 	border-radius: 3.5em;
