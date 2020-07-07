@@ -45,7 +45,18 @@ line.link {
         })
         graph.connect('You', 'Thing2')
       }, 2000)
-    
+
+
+        setTimeout(() => {      
+        graph.add({
+          id: 'Thing3',
+          me: false,
+          name: '192.168.1.72'
+        })
+        graph.connect('Thing1', 'Thing3')
+      }, 3000)
+
+
       </script>
 
   <section class="section">
