@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>(!)</title><!-- #F!nKgVGISQ !Tespm-wPJIJwRtajOEuV8g -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.0/js/all.js"></script>
+    <script src="p2p-graph.js"></script>
+    <style>
+line.link {
+    stroke: #00ff59!important;
+    stroke-width: 2!important;
+}
+  </style>
+  </head>
+  <body>
+    <div class="torrent-graph"></div>
+    <script>
+        let graph = new window.P2PGraph('.torrent-graph')
+    
+        graph.add({
+          id: 'You',
+          me: true,
+          name: 'Ты'
+        })
+
+        setTimeout(() => {
+        graph.add({
+          id: 'Thing1',
+          me: false,
+          name: '192.168.1.20'
+        })
+        graph.connect('You', 'Thing1')
+      }, 1000)
+
+      setTimeout(() => {      
+        graph.add({
+          id: 'Thing2',
+          me: false,
+          name: '192.168.1.44'
+        })
+        graph.connect('You', 'Thing2')
+      }, 2000)
+    
+      </script>
+
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        
+      </h1>
+    </div>
+  </section>
+  </body>
+</html>
