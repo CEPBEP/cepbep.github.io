@@ -32,7 +32,7 @@ h1 {
 
 #ascii {
     font-family: 'Courier New', 'Courier', monospace;
-    font-size: 18.75px;
+    font-size: 100%;
     line-height: 0.55rem;
     letter-spacing: -3.5px;
     text-align: center;
