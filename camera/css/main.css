@@ -33,9 +33,9 @@ h1 {
 #ascii {
     font-family: 'Courier New', 'Courier', monospace;
     font-size: 18.75px;
-    line-height: 0.8rem;
+    line-height: 0.55rem;
     letter-spacing: -3.5px;
-    /* text-align: center; */
+    text-align: center;
     margin: 0px;
     color: #000;
     /* font-family: 'Modak', cursive; */
