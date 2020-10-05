@@ -7,11 +7,6 @@
   <meta name="googlebot" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
-  <script type="text/javascript" src="/js/lib/dummy.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
-
       <script type="text/javascript" src="https://cdn.rawgit.com/strelok2012/BluePrintRenderer/f0ebd3b179e0b829c943961442f524e663ef2b9a/dist/main.js"></script>
 
   <style id="compiled-css" type="text/css">
@@ -33,81 +28,10 @@ body {
     /* EOS */
   </style>
 
-  <script id="insert"></script>
 
 
-    <script src="stringify.js?659a04aab04fbd31762a360cf13d7a67fdfd88f3" charset="utf-8"></script>
-    <script>
-      const customConsole = (w) => {
-        const pushToConsole = (payload, type) => {
-          w.parent.postMessage({
-            console: {
-              payload: stringify(payload),
-              type:    type
-            }
-          }, "*")
-        }
 
-        w.onerror = (message, url, line, column) => {
-          // the line needs to correspond with the editor panel
-          // unfortunately this number needs to be altered every time this view is changed
-          line = line - 70
-          if (line < 0){
-            pushToConsole(message, "error")
-          } else {
-            pushToConsole(`[${line}:${column}] ${message}`, "error")
-          }
-        }
 
-        let console = (function(systemConsole){
-          return {
-            log: function(){
-              let args = Array.from(arguments)
-              pushToConsole(args, "log")
-              systemConsole.log.apply(this, args)
-            },
-            info: function(){
-              let args = Array.from(arguments)
-              pushToConsole(args, "info")
-              systemConsole.info.apply(this, args)
-            },
-            warn: function(){
-              let args = Array.from(arguments)
-              pushToConsole(args, "warn")
-              systemConsole.warn.apply(this, args)
-            },
-            error: function(){
-              let args = Array.from(arguments)
-              pushToConsole(args, "error")
-              systemConsole.error.apply(this, args)
-            },
-            system: function(arg){
-              pushToConsole(arg, "system")
-            },
-            clear: function(arg){
-              systemConsole.clear.apply(this, args)
-            },
-            time: function(arg){
-              systemConsole.time.apply(this, args)
-            },
-            assert: function(arg){
-              systemConsole.assert.apply(this, args)
-            },
-            dir: function(arg){
-              systemConsole.dir.apply(this, args)
-            }
-          }
-        }(window.console))
-
-        window.console = console
-
-        console.system("Running fiddle")
-      }
-
-      if (window.parent){
-        customConsole(window)
-      }
-    </script>
 </head>
 <body>
     
@@ -122,35 +46,7 @@ body {
 
   //]]></script><canvas width="1175" height="1302" style="touch-action: none; cursor: inherit;"></canvas>
 
-  <script>
-    // tell the embed parent frame the height of the content
-    if (window.parent && window.parent.parent){
-      window.parent.parent.postMessage(["resultsFrame", {
-        height: document.body.getBoundingClientRect().height,
-        slug: "yqL8370w"
-      }], "*")
-    }
 
-    // always overwrite window.name, in case users try to set it manually
-    window.name = "result"
-  </script>
-
-    <script>
-      let allLines = []
-
-      window.addEventListener("message", (message) => {
-        if (message.data.console){
-          let insert = document.querySelector("#insert")
-          allLines.push(message.data.console.payload)
-          insert.innerHTML = allLines.join(";\r")
-
-          let result = eval.call(null, message.data.console.payload)
-          if (result !== undefined){
-            console.log(result)
-          }
-        }
-      })
-    </script>
 
 
 
