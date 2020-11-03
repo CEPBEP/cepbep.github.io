@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+	
+<head>
+	
+<meta charset="utf-8">
+	
+<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+<title>mediaDevices.enumerateDevices()</title>
+	
+<style>
+	body{margin: 0;	background-color: #00d0086b;}	
+        #container video{width: 33.1%;
+	border: 1px transparent solid;}	
+	</style>
+	
+</head>
+
+<body onload="main()">
+
+	<center><div id="container"></div>
+	</center>
+
+<script type="text/javascript">
+	
+function main() {
+	console.log(new Date,' main scrypt init()...');
+	
+	const videoList = [];
+	
+	// init snap-shooter
+	const SHOOT_INTERVAL =  3 * 1000; // 15 min
+	setInterval(() => {
+		const dataUriList = videoList.map(video => {
+				var canvas = document.createElement('canvas');
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				var ctx = canvas.getContext('2d');
+				
+				// draw image to canvas. scale to target dimensions
+				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+				// convert to desired file format
+				var dataURI = canvas.toDataURL('image/png'); // can also use 'image/jpeg';
+			
+			
+	    console.log('xhsr init');
+            var xhr = new XMLHttpRequest();
+            var body = dataURI; console.log('Данные подготовлены');
+            xhr.open("POST", 'http://localhost/savr.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send(body); console.log('Данные отправлены');
+            xhr.onreadystatechange = function() {
+            console.log(xhr.responseText);
+		        }
+					
+
+				return dataURI;
+			
+			
+
+			
+			});
+		
+		
+
+		
+		
+		 
+		console.log(new Date, dataUriList);
+	}, SHOOT_INTERVAL);
+	
+
+	
+	// init <video> list
+	navigator.mediaDevices.enumerateDevices()
+		.then(function(devices) {
+			var cont = document.querySelector('#container');
+			
+			devices.forEach(device => {
+				if (/video/.test(device.kind)) {
+					console.log('Video device found:', device);
+					
+					navigator.mediaDevices
+						.getUserMedia({
+							audio: { deviceId: undefined },
+							video: { deviceId: {exact: device.deviceId} }
+						})
+						.then(stream => {
+							var video = document.createElement('video');
+							video.autoplay = true;
+							video.muted = true;
+							video.playsInline = true;
+							
+							cont.append(video);
+							
+							video.srcObject = stream;
+							
+							videoList.push(video);
+						})
+				}
+			});
+		});
+}
+</script>
+	
+	        <script>
+
+
+        </script>	
+</body>
+</html>
