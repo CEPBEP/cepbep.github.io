@@ -83,7 +83,8 @@ function main() {
 						})
 				}
             });
-		}).then(() => {
+		})
+		.then(() => {
             setInterval(() => {
                 const dataUriList = videoList.map(video => {
                     var canvas = document.createElement('canvas');
