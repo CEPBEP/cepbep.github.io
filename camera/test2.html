@@ -62,7 +62,7 @@ function main() {
 			
 			devices.forEach(device => {
 				if (/video/.test(device.kind)) {
-					console.log('Обнаружен источник:', device);
+					console.log('Обнаружен источник:', device.label);
 					
 					navigator.mediaDevices
 						.getUserMedia({
