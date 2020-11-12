@@ -173,3 +173,7 @@ function App(conf) {
     return [width, height];
   }
 }
+// повторить с интервалом 2 секунды
+let timerId = setInterval(() =>  updateLightsColors(), 2000);
+
+setInterval(() =>  updateLightsColors(), 2000);
