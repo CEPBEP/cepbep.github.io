@@ -111,7 +111,6 @@ function App(conf) {
 
   function animate() {
     requestAnimationFrame(animate);
-
     animatePlane();
     animateLights();
 
