@@ -383,9 +383,9 @@ var COLOR = [
         fn: squares,
         sort: sortTopMid
     }],
-    curr_color = 0,
+    curr_color = 1,
     playing = !0,
-    curr_vis = 0,
+    curr_vis = 5,
     color = COLOR[curr_color],
     vis = VIS[curr_vis];
 randomHues(), https && setup(), document.body.addEventListener("keyup", function(a) {
