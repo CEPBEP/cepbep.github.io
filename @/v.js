@@ -383,7 +383,7 @@ var COLOR = [
         fn: squares,
         sort: sortTopMid
     }],
-    curr_color = 6,
+    curr_color = 7,
     playing = !0,
     curr_vis = 4,
     color = COLOR[curr_color],
