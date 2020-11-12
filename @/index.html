@@ -6,7 +6,29 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
       <link rel="stylesheet" href="https://appvk.github.io/assets/css/font-awesome/nativ/css/style.css">
   </head>
-   <body>   
+   <body> 
+    
+     <div id="container">
+    <header>
+      <!--<h1>Privacy <span>Search</span></h1>
+      <p>Search all Youtube videos, Privately.</p>-->
+    </header>
+    <section>
+      <form id="search-form" name="search-form" onsubmit="return search()">
+        <div class="fieldcontainer">
+          <input type="search" id="query" class="search-field" placeholder="слово..">
+          <input type="submit" name="search-btn" id="search-btn" value="">
+        </div>
+      </form>
+      <ul id="results"></ul>
+      <div id="buttons"></div>
+    </section>
+    <footer>
+      <!--<p>Copyright - Gowixx &copy; 2020</p>-->
+    </footer>
+  </div>
+    
+    
    <iframe 
     id="frame"
     src="https://www.youtube.com/embed/GyCBVsBgpY4"
