@@ -574,5 +574,5 @@ randomHues(), https && setup(), document.body.addEventListener("keyup", function
     }
   setInterval(() =>  updateLightsColors(), 100);
 }});
-  
+}  
 
