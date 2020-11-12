@@ -91,7 +91,6 @@ function App(conf) {
     const r = 30;
     const y = 10;
     const lightDistance = 500;
-
     // light = new THREE.AmbientLight(conf.ambientColor);
     // scene.add(light);
 
