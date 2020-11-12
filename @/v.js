@@ -385,7 +385,7 @@ var COLOR = [
     }],
     curr_color = 1,
     playing = !0,
-    curr_vis = 5,
+    curr_vis = 4,
     color = COLOR[curr_color],
     vis = VIS[curr_vis];
 randomHues(), https && setup(), document.body.addEventListener("keyup", function(a) {
