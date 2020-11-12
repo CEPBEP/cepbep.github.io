@@ -573,6 +573,6 @@ randomHues(), https && setup(), document.body.addEventListener("keyup", function
             updateColor(1)
     }
   setInterval(() =>  updateLightsColors(), 100);
-});
+}});
   
-}
+
