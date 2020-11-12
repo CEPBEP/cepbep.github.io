@@ -1,8 +1,8 @@
 "use strict";
-
 function updateVis(a) {
     $.ctx.clearRect(0, 0, S.w, S.h), 1 === a ? curr_vis = curr_vis < VIS.length - 1 ? curr_vis + 1 : 0 : -1 === a && (curr_vis = curr_vis > 0 ? curr_vis - 1 : VIS.length - 1), vis = VIS[curr_vis]
 }
+
 function updateColor(a) {
     1 === a ? curr_color = curr_color < COLOR.length - 1 ? curr_color + 1 : 0 : -1 === a && (curr_color = curr_color > 0 ? curr_color - 1 : COLOR.length - 1), color = COLOR[curr_color]
 }
