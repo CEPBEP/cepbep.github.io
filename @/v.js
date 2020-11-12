@@ -5,7 +5,6 @@ function updateVis(a) {
 function updateColor(a) {
     1 === a ? curr_color = curr_color < COLOR.length - 1 ? curr_color + 1 : 0 : -1 === a && (curr_color = curr_color > 0 ? curr_color - 1 : COLOR.length - 1), color = COLOR[curr_color]
 }
-
 function toggleVis() {
     playing = !playing
 }
