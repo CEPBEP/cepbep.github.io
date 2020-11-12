@@ -171,6 +171,6 @@ function App(conf) {
     const width = height * cam.aspect;
     return [width, height];
   }
-setInterval(() =>  updateLightsColors(), 100);
+setInterval(() =>  updateLightsColors(), 50);
 }  
 
