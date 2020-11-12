@@ -1,4 +1,5 @@
 "use strict";
+
 function updateVis(a) {
     $.ctx.clearRect(0, 0, S.w, S.h), 1 === a ? curr_vis = curr_vis < VIS.length - 1 ? curr_vis + 1 : 0 : -1 === a && (curr_vis = curr_vis > 0 ? curr_vis - 1 : VIS.length - 1), vis = VIS[curr_vis]
 }
@@ -8,6 +9,7 @@ function updateColor(a) {
 function toggleVis() {
     playing = !playing
 }
+
 function handleAudio(a) {
     var b = window.AudioContext || window.webkitAudioContext;
     A.audio_ctx = new b, A.audio_src = A.audio_ctx.createMediaStreamSource(a), A.audio_analyser = A.audio_analyser || A.audio_ctx.createAnalyser(), A.audio_analyser.minDecibels = -90, A.audio_analyser.maxDecibels = 0, A.audio_analyser.smoothingTimeConstant = .8, A.audio_analyser.fftSize = A.fft, A.audio_src.connect(A.audio_analyser), loop()
