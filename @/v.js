@@ -329,14 +329,14 @@ var https = checkHTTPS(),
     hi_res = heap_limit || cpu_limit || window.innerWidth > 1400;
 A.fft = hi_res ? 2048 : 256, A.max = 200, A.min = 100, A.rms = 0, S.divisible = divisible(A.fft / 4), S.w = window.innerWidth, S.h = window.innerHeight, hi_res && (S.w *= 2, S.h *= 2), S.w_rad = S.w / 2, S.h_rad = S.h / 2, $.cvs = document.createElement("canvas"), $.cvs_fg = document.createElement("canvas"), $.ctx = $.cvs.getContext("2d"), $.ctx_fg = $.cvs_fg.getContext("2d"), document.body.appendChild($.cvs), document.body.appendChild($.cvs_fg), $.cvs.width = S.w, $.cvs_fg.width = S.w, $.cvs.height = S.h, $.cvs_fg.height = S.h, V.runners = [];
 var COLOR = [
-      /*[0, 0, 80],
-        [0, 100, 60],
-        [60, 100, 60],
-        [120, 100, 60],
+    ["RANDOM", 100, 60],
+             [0, 0, 80],
+           [0, 100, 60],
+          [60, 100, 60],
+         [120, 100, 60],
         [180, 100, 60],
         [240, 100, 60],
-        [300, 100, 60],*/
-        ["RANDOM", 100, 60]
+        [300, 100, 60]
     ],
     VIS = [{
         fn: dashes
