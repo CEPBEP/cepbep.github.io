@@ -14,7 +14,6 @@ function App(conf) {
     light4Color: 0xee3bcf,
     ...conf };
 
-
   let renderer, scene, camera, cameraCtrl;
   let width, height, cx, cy, wWidth, wHeight;
   const TMath = THREE.Math;
