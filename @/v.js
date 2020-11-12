@@ -22,7 +22,6 @@ function setup() {
         audio: !0
     }, handleAudio, a))
 }
-
 function loop() {
     var b = new Uint8Array(A.audio_analyser.frequencyBinCount);
     vis.data ? A.audio_analyser[vis.data](b) : A.audio_analyser.getByteFrequencyData(b), vis.keep || $.ctx.clearRect(0, 0, S.w, S.h), $.ctx_fg.clearRect(0, 0, S.w, S.h), $.ctx.lineWidth = 1, V.points1 = [], V.points2 = [], V.points3 = [], V.points4 = [];
