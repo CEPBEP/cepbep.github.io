@@ -1,0 +1,25 @@
+html,
+body,
+body:after,
+canvas {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* stay put when ios tries to elastic scroll */
+canvas,
+body:after {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+body:after {
+  content: '';
+  z-index: -1;
+  background: #a9a89b;
+  background: linear-gradient(45deg, #a9a89b, #76766d)
+}
