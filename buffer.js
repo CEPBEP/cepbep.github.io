@@ -15,5 +15,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   console.log(`Node status: ${status}`)
   document.getElementById('status').innerHTML = `<span class="${status}"></span>`
+ 
+  /*
+  
+  */
+  
+  const myData = {
+    name: 'David',
+    likes: ['js-ipfs', 'icecream', 'steak']
+  }
 
+  const cid = await ipfs.dag.put(myData, { format: 'dag-cbor', hashAlg: 'sha2-256' })
+  const result = await ipfs.dag.get(cid)
+  const res = JSON.stringify(result.value)
+  
+  
+  
 })
