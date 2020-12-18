@@ -8,23 +8,22 @@ input#text {
     border: 0;
     outline: none;
 }
+.green{transition: all .5s ease;
+width: 25px;height: 25px;display: block;border-radius: 50%;background-color: green;}
  </style>
  <script src="https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js"></script>
  <script src="https://unpkg.com/ipld-block/dist/index.min.js"></script>
- <script src="https://bundle.run/buffer"></script>
+<script src="https://bundle.run/buffer"></script>
 </head>
 <body>
 
-    <h1 id="status">@#:</h1>
-    <input type="text" id="text" placeholder=">_" style="
-    text-align: center;
-    width: 100%;
-">
+    <h1 id="status"></h1>
+    <input type="text" id="text" placeholder=">_" style="text-align: center;width: 100%;">
 <center>
 <p id="encoded"></p>
 <p id="decoded"></p>
 </center>
 
-  <script  src="buffer.js"></script>
+  <script  src="script.js"></script>
 </body>
 </html>
