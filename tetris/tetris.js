@@ -893,9 +893,9 @@ window.onkeydown = function (event) {
  		}
  		html += "<br />Drop Time: " + speed;
  		if (ai) {
- 			html += "<br />Moves: " + movesTaken + "/" + moveLimit;
- 			html += "<br />Generation: " + generation;
- 			html += "<br />Individual: " + (currentGenome + 1)  + "/" + populationSize;
+ 			html += "<br />Ход: " + movesTaken + "/" + moveLimit;
+ 			html += "<br />Генерация: " + generation;
+ 			html += "<br />Ген/Популяция: " + (currentGenome + 1)  + "/" + populationSize;
  			html += "<br /><pre style=\"font-size:12px\">" + JSON.stringify(genomes[currentGenome], null, 2) + "</pre>";
  			if (inspectMoveSelection) {
  				html += "<br /><pre style=\"font-size:12px\">" + JSON.stringify(moveAlgorithm, null, 2) + "</pre>";
