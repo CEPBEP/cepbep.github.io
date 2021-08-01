@@ -878,7 +878,7 @@ window.onkeydown = function (event) {
  function updateScore() {
  	if (draw) {
  		var scoreDetails = document.getElementById("score");
- 		var html = "<br /><br /><h2>&nbsp;</h2><h2>Score: " + score + "</h2>";
+ 		var html = "<br /><br /><h2>&nbsp;</h2><h2>Счёт: " + score + "</h2>";
  		html += "<br /><b>--Upcoming Shape--</b>";
  		for (var i = 0; i < upcomingShape.length; i++) {
  			var next =replaceAll((upcomingShape[i] + ""), "0", "&nbsp;");
