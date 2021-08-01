@@ -854,7 +854,7 @@ window.onkeydown = function (event) {
  function output() {
  	if (draw) {
  		var output = document.getElementById("output");
- 		var html = "<h1>Tetris AI</h1><h5>A genetic programming approach</h5>var grid = [";
+ 		var html = "<h1>Тетрис ИИ</h1><h5>Генетический Алгоритм</h5>var grid = [";
  		var space = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
  		for (var i = 0; i < grid.length; i++) {
  			if (i === 0) {
