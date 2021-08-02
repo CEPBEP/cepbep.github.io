@@ -891,7 +891,7 @@ window.onkeydown = function (event) {
  			html = replaceAll(html, "," + (c + 1), ",<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>");
  			html = replaceAll(html, (c + 1) + ",", "<font color=\"" + colors[c] + "\">" + (c + 1) + "</font>,");
  		}
- 		html += "<br /> время : " + speed;
+ 		html += "<br /> Время : " + speed;
  		if (ai) {
  			html += "<br />Ход: " + movesTaken + "/" + moveLimit;
  			html += "<br />Генерация: " + generation;
