@@ -1,18 +1,21 @@
 <html>
- <head>
-  <title>Metamask</title>
+
+<head>
+  <title>Web3 Metamask Login</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
- </head>
+</head>
 
- <body class="flex w-screen h-screen justify-center items-center">
-   <div class="flex-col space-y-2 justify-center items-center">
-     <button id='loginButton' onclick="" class="mx-auto rounded-md p-2 bg-purple-500 text-white">
-      - Login with MetaMask -
-     </button>
-     <p id='userWallet' class='text-lg text-gray-600 my-2'></p>
-   </div>
+<body class="flex w-screen h-screen justify-center items-center">
+<center>
+  <div class="flex-col space-y-2 justify-center items-center">
+    <button id='loginButton' onclick="" class="mx-auto rounded-md p-2 bg-purple-500 text-white">
+      войти
+    </button>
+    <p id='userWallet' class='text-lg text-gray-600 my-2'></p>
+  </div>
+  </center>
 
-   <script>
+  <script>
     window.userWalletAddress = null
     const loginButton = document.getElementById('loginButton')
     const userWallet = document.getElementById('userWallet')
@@ -38,7 +41,7 @@
 
       window.userWalletAddress = accounts[0]
       userWallet.innerText = window.userWalletAddress
-      loginButton.innerText = 'Sign out of MetaMask'
+      loginButton.innerText = 'выйти'
 
       loginButton.removeEventListener('click', loginWithMetaMask)
       setTimeout(() => {
@@ -49,7 +52,7 @@
     function signOutOfMetaMask() {
       window.userWalletAddress = null
       userWallet.innerText = ''
-      loginButton.innerText = 'Sign in with MetaMask'
+      loginButton.innerText = 'войти'
 
       loginButton.removeEventListener('click', signOutOfMetaMask)
       setTimeout(() => {
@@ -61,6 +64,6 @@
       toggleButton()
     });
   </script>
-
 </body>
+
 </html>
