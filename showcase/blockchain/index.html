@@ -154,13 +154,13 @@
 ">this</span>.nonce = 0;                                                                                                   
         <span style="
     color: orange;
-		     ">}</span>     
+">}</span>     
         <span style="
     color: blue;
 ">calculateHash</span><span style="
     color: orange;
 ">()</span>
-<span style="
+         <span style="
     color: orange;
 ">{</span>
         return Encrypt.SHA256(this.index + this.previousHash + this.timeStamp + this.data + this.nonce).toString();
