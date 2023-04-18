@@ -9,6 +9,7 @@ gsap.timeline({scrollTrigger:{trigger:'.scrollDist', start:'top top', end:'botto
     .fromTo('.mountMg', {y:-30},{y:-250}, 0)
     .fromTo('.mountFg', {y:-50},{y:-600}, 0)
     .fromTo('.mg', {y:1000},{y:200}, 0)
+    .fromTo('.im', {x:1000},{x:0}, 0)
 
 $('#arrowBtn').on('mouseenter', (e)=>{ gsap.to('.arrow', {y:10, duration:0.8, ease:'back.inOut(3)', overwrite:'auto'}); })
 $('#arrowBtn').on('mouseleave', (e)=>{ gsap.to('.arrow', {y:0, duration:0.5, ease:'power3.out', overwrite:'auto'}); })
