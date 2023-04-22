@@ -15,7 +15,9 @@ body {
 div {
   box-sizing: border-box;
 }
-
+img {
+    border-radius: 7px;
+}
 .horizontal-scroll-wrapper {
   position: absolute;
   display: block;
