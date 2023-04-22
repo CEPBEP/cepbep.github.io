@@ -19,7 +19,7 @@ div {
 .horizontal-scroll-wrapper {
   position: absolute;
   display: block;
-  top: 77px;
+  top: 135px;
   left: 175px;
   width: calc(300px + 1px);
   max-height: 1200px;
