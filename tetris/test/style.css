@@ -1,11 +1,17 @@
 ::-webkit-scrollbar {
-  width: 1px;
+  width: 5px;
   height: 1px;
      }
 ::-webkit-scrollbar-button {
   width: 1px;
   height: 1px;
      }
+::-webkit-scrollbar-thumb {
+    width: 0px;
+    height: 0px;
+    background-color: white;
+    border-radius: 3px;
+}
 body {
   background: #111;
      }
