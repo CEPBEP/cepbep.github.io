@@ -33,7 +33,7 @@ img  {
     margin: 0;
     padding-top: 1px;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: hidden;border-radius: 8px;
     transform: rotate(-90deg) translateY(-250px);
     transform-origin: right top;
      }
