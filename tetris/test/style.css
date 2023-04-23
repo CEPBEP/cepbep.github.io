@@ -18,7 +18,7 @@ img  {
 .horizontal-scroll-wrapper {
     position: absolute;
     display: block;
-    top: 55px;
+  /*top: 55px;*/
     left: -165px;
     width: calc(430px + 1px);
     max-height: 1840px;
