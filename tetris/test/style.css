@@ -35,7 +35,7 @@ img  {
     overflow-y: auto;
     overflow-x: hidden;border-radius: 8px;
     transform: rotate(-90deg) translateY(-250px);
-    transform-origin: right top;
+    transform-origin: right top;padding: 25px;
      }
 .horizontal-scroll-wrapper > div {
   display: block;
