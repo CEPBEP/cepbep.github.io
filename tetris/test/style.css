@@ -2,6 +2,7 @@
   width: 5px;
   height: 1px;
   border: 1px dashed white;
+  border-radius: 5px;
      }
 ::-webkit-scrollbar-button {
   width: 1px;
