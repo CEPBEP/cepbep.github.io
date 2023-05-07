@@ -7,6 +7,7 @@
 <script>
 fetch('https://ipapi.co/json/')
   .then(d => d.json())
-  .then(d => document.querySelector('#ip').innerHTML = d.ip);
+  //.then(d => document.querySelector('#ip').innerHTML = d.ip);
+  .then(d => document.querySelector('#ip').innerHTML = d.json);
 </script>
 <div id="ip"></div>
