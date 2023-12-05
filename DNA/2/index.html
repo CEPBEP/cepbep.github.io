@@ -26,7 +26,9 @@
   .button-main-translator {
     justify-self: left;
   }
-
+  .text-counter {
+    color: #4CAF50;
+  }
   .disabled-button {
     opacity: 0.5;
     pointer-events: none;
@@ -105,7 +107,7 @@
     var byteCount = new TextEncoder().encode(inputValue).length;
 
     if (byteCounter) {
-      byteCounter.textContent = `Байты: ${byteCount} of a maximum 1024`;
+      byteCounter.textContent = `Байты: ${byteCount} из 1024 возможных`;
 
       if (byteCount > 1024) {
         byteCounter.style.color = "red";
