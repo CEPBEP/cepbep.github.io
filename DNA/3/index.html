@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>viz</title>
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<head>
+    <meta charset="utf-8">
+    <title>Test</title>
+  <script src="https://unpkg.com/seqviz"></script>
+</head>
+
+<div id="root">
+</div>
+<!-- partial -->
+  <script>window.seqviz
+    .Viewer("root", {
+      name: "J23100",
+      seq: "TTGACGGCTAGCTCAGTCCTAGGTACAGTGCTAGC",
+      style: { height: "100vh", width: "100vw" },
+      annotations: [{ name: "promoter", start: 0, end: 34, direction: 1 }],
+      highlights: [{ start: 0, end: 10 }],
+      enzymes: ['Q']
+    })
+    .render();</script>
+</body>
+</html>
