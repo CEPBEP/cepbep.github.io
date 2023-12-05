@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link href="biomem.min.css" rel="stylesheet" type="text/css">
+  </head>
+<body>
+
+<style>
+  .form-textarea {
+    overflow-x: hidden;
+  }
+
+  .button-main-translator {
+    justify-self: left;
+  }
+
+  .disabled-button {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #fff;
+    border-bottom-color: #008c53;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    position: absolute;
+    top: 40%;
+    left: 45%;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+
+  .form-input-container-output.loading > .loader {
+    display: block;
+  }
+
+  .form-input-container > .error-msg {
+    display: none;
+  }
+
+  .form-input-container.error-msg > .error-msg {
+    display: block;
+  }
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  #error-msg {
+    color: red;
+    font-size: 1.2rem;
+  }
+</style>
+
+<form class="form-translator-container">
+  <div class="form-input-container" id="form-text-dna">
+    <label class="form_label" for="user-input">Текст</label>
+    <textarea class="form-textarea" id="user-input" name="user-input"></textarea>
+    <div class="text-counter"></div>
+    <p class="error-msg" id="error-msg">что то не так...</p>
+</div>
+  <button class="button-main-translator" type="button" id="encodeButton">
+       Кодировать
+  </button>
+   <div class="form-input-container-output" id="dna-container-output">
+    <label class="form_label" for="input-encoded">ДНК</label>
+    <span class="loader"></span>
+    <textarea class="form-textarea" id="input-encoded" name="input-encoded" readonly=""></textarea>
+  </div>
+ </form>
+</div>
+
+<div>
+  <script>
+    const API_URL =
+    "https://epvdcbyvjhcta77pqfye2shufu0fqgwu.lambda-url.eu-west-1.on.aws/";
+  function updateByteCount() {
+    var userInput = document.getElementById("user-input");
+    var byteCounter = document.querySelector(".text-counter");
+    var encodeButton = document.getElementById("encodeButton");
+    var inputValue = userInput.value;
+    var byteCount = new TextEncoder().encode(inputValue).length;
+
+    if (byteCounter) {
+      byteCounter.textContent = `Байты: ${byteCount} of a maximum 1024`;
+
+      if (byteCount > 1024) {
+        byteCounter.style.color = "red";
+        encodeButton.classList.add("disabled-button");
+        encodeButton.textContent = "Message too Long";
+      } else {
+        byteCounter.style.color = ""; // Reset color
+        encodeButton.classList.remove("disabled-button");
+        encodeButton.textContent = "Кодировать";
+      }
+    }
+  }
+  async function encodeToDNA() {
+    var userInput = document.getElementById("user-input");
+    var inputEncoded = document.getElementById("input-encoded");
+    const formInputContainerEl = document.getElementById("form-text-dna");
+    const formInputContainerOutputEl = document.getElementById(
+      "dna-container-output"
+    );
+
+    if (!userInput.value.length) {
+      return;
+    }
+
+    formInputContainerEl.classList.remove("error-msg");
+    formInputContainerOutputEl.classList.add("loading");
+
+    try {
+      const encodedValue = await fetch(`${API_URL}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: userInput.value,
+        }),
+      }).then((response) => {
+        if (response.ok) {
+          return response.text();
+        }
+        throw new Error(response.text());
+      });
+
+      inputEncoded.value = encodedValue;
+
+      localStorage.setItem("userInput", userInput.value);
+    } catch (error) {
+      formInputContainerEl.classList.add("error-msg");
+    }
+
+    formInputContainerOutputEl.classList.remove("loading");
+  }
+
+  // Add an input event listener to update byte count on every input change
+  var userInput = document.getElementById("user-input");
+  userInput.addEventListener("input", updateByteCount);
+  const encodeBtn = document.getElementById("encodeButton");
+  encodeBtn.addEventListener("click", encodeToDNA);
+</script>
+</div>
+
+<div class="form-translator-container-copy">
+  <div class="form-input-container">
+    <p class="form_label">Label</p>
+    <div class="form-textarea"></div>
+    <p class="text-counter">Байты: </p>
+  </div>  
+  </div>
+</div>
+</div>
+</div>
+    </section>
+
+ </body>
+</html>
