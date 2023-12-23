@@ -1,0 +1,406 @@
+
+.container {
+ /* display: none; */
+     }
+
+.title {
+  margin-top: 230px;
+  text-align: center;
+}
+
+.desk {
+  position: absolute;
+  left: 10px;
+  top: 218px;
+  width: 380px;
+  height: 4px;
+  background: #ffd700;
+}
+
+.desk::before,
+.desk::after {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 14px;
+  background: #ffd700;
+  position: absolute;
+}
+
+.desk::before {
+  left: 34px;
+  top: 4px;
+}
+
+.desk::after {
+  left: 342px;
+  top: 4px;
+}
+
+.bottle {
+  position: absolute;
+  left: 70px;
+  top: 144px;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: #ffd700;
+}
+
+.bottle::before {
+  content: "";
+  display: block;
+  width: 18px;
+  height: 50px;
+  position: absolute;
+  top: -41px;
+  left: 28px;
+  background: #ffd700;
+}
+
+.bottleGap {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: black;
+}
+
+.bottleGap::before {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 50px;
+  position: absolute;
+  top: -41px;
+  left: 28px;
+  background: black;
+}
+
+.bottleLiquid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(145deg, #ffd700, #ffd700);
+  width: 66px;
+  height: 35px;
+  margin: 33px 0 0 2px;
+  border-radius: 0 0 33px 33px;
+}
+
+.cup {
+  position: absolute;
+  top: 141px;
+  left: 180px;
+  width: 64px;
+  height: 78px;
+  background: #ffd700;
+}
+
+.cup::before {
+  content: "";
+  display: block;
+  left: 0;
+  top: 0;
+  border-top: 12px solid #ffd700;
+  border-left: 12px solid transparent;
+  margin-left: -12px;
+}
+
+.cupGap {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 60px;
+  height: 74px;
+  background: black;
+}
+
+.cupGap::before {
+  content: "";
+  display: block;
+  left: 0;
+  top: 0;
+  border-top: 10px solid black;
+  border-left: 10px solid transparent;
+  margin-left: -10px;
+}
+
+.cupLiquid {
+  position: absolute;
+  top: 44px;
+  left: 2px;
+  width: 56px;
+  height: 28px;
+  background: linear-gradient(145deg, #ffd700, #ffd700);
+}
+
+.cupGap > span {
+  position: absolute;
+  right: 0;
+  width: 6px;
+  height: 2px;
+  background: #ffd700;
+}
+
+.cupGap > span:nth-child(2) {
+  bottom: 10px;
+}
+
+.cupGap > span:nth-child(3) {
+  bottom: 20px;
+}
+
+.cupGap > span:nth-child(4) {
+  bottom: 30px;
+}
+
+.cupGap > span:nth-child(5) {
+  bottom: 40px;
+}
+
+.cupGap > span:nth-child(6) {
+  bottom: 50px;
+}
+
+.cupGap > span:nth-child(7) {
+  bottom: 60px;
+}
+
+.filter {
+  position: absolute;
+  left: 220px;
+  top: 88px;
+  width: 8px;
+  height: 32px;
+  background: #ffd700;
+}
+
+.filter::before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 32px;
+  border-top: 8px solid #ffd700;
+  border-right: 8px solid transparent;
+}
+
+.filter::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: -22px;
+  top: -20px;
+  z-index: -1;
+  border-top: 26px solid #ffd700;
+  border-left: 26px solid transparent;
+  border-right: 26px solid transparent;
+}
+
+.filterGap {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 4px;
+  height: 29px;
+  background: black;
+}
+
+.filterGap::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 29px;
+  border-top: 4px solid black;
+  border-right: 4px solid transparent;
+}
+
+.filterGap::before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: -20px;
+  top: -20px;
+  border-top: 22px solid black;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+}
+
+.filterLiquid {
+  position: absolute;
+  left: -10px;
+  top: -12px;
+  border-top: 12px solid #ffd700;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+}
+
+.support {
+  position: absolute;
+  left: 215px;
+  top: 92px;
+  width: 116px;
+  height: 4px;
+  background: #ffd700;
+}
+
+.support::before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 66px;
+  top: -40px;
+  width: 4px;
+  height: 160px;
+  background: #ffd700;
+}
+
+.supportCross {
+  position: absolute;
+  left: 57px;
+  top: -11px;
+  width: 18px;
+  height: 24px;
+  background: black;
+  border: 2px solid #ffd700;
+}
+
+.dot {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 4px;
+  height: 4px;
+  background: #ffd700;
+  border-radius: 50%;
+}
+
+.supportBase {
+  position: absolute;
+  left: 266px;
+  top: 191px;
+  width: 30px;
+  height: 24px;
+  background: black;
+  border: 2px solid #ffd700;
+}
+
+.supportBase::before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 30px;
+  top: 12px;
+  width: 22px;
+  height: 4px;
+  background: #ffd700;
+}
+
+@keyframes expolode {
+  28% {
+    opacity: 1;
+  }
+  32% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes drop {
+  80% {
+    opacity: 1;
+    top: 127px;
+  }
+  100% {
+    top: 190px;
+  }
+}
+
+.bubble1 {
+  position: absolute;
+  left: 93px;
+  top: 86px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #ffd700;
+  opacity: 0;
+  animation: expolode 0.4s infinite;
+}
+
+.bubble2 {
+  position: absolute;
+  left: 108px;
+  top: 78px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #ffd700;
+  opacity: 0;
+  animation: expolode 0.8s infinite;
+}
+
+.bubble3 {
+  position: absolute;
+  left: 98px;
+  top: 70px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid #ffd700;
+  opacity: 0;
+  animation: expolode .7s infinite;
+}
+
+.drip {
+  position: absolute;
+  left: 220px;
+  top: 127px;
+  width: 4px;
+  height: 4px;
+  background: #ffd700;
+  border-radius: 50%;
+  opacity: 0;
+  animation: drop 1.6s infinite;
+}
+
+
+@media (min-width: 370px) {
+  /* Стили для устройств с шириной viewport, находящейся в диапазоне 768px - 991px */
+
+
+   .container {
+display: none;
+  
+  }
+  }
+
+/* Устройства с очень маленьким экраном (смартфоны, меньше 768px) */
+/* Стили CSS (по умолчанию) - для ширины viewport <768px */
+
+/* Устроства с маленьким экраном (планшеты, 768px и выше) */
+@media (min-width: 768px) {
+  /* Стили для устройств с шириной viewport, находящейся в диапазоне 768px - 991px */
+
+
+   .container {
+    display: unset;
+    position: absolute;
+    bottom: 2%;
+  
+  }
+  }
+  
+  /* Устройства со средним экраном (ноутбуки и компьютеры, 992px и выше) */
+  @media (min-width: 992px) {
+    /* Стили для устройств с шириной viewport, находящейся в диапазоне 992px - 1199px */
+  }
+  
+  /* Устройства с большим экраном (компьютеры, 1200px и выше) */
+  @media (min-width: 1200px) {
+    /* Стили для устройств с шириной viewport >1200px */
+  }
