@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <link href="
     https://cdn.jsdelivr.net/npm/asciinema-player@3.7.0/dist/bundle/asciinema-player.min.css
     " rel="stylesheet">
@@ -18,5 +17,15 @@
       { cols: 86, rows: 40 }
     );
   </script>
+
+  <div id="playerz"></div>
+  <script>
+   AsciinemaPlayer.create(
+        '/assets/566887.cast',
+      document.getElementById('playerz'),
+      { cols: 125, rows: 39 }
+    );
+  </script>
+    
 </body>
 </html>
