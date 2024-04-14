@@ -140,6 +140,10 @@ span.wb-full {
 }
 .term::after {
 content:'FSB - FORMAT STRING BUG';
+position: relative;
+left: 20px;
+top: -17px;
+font-size: 2em;
 }
 .wb-body {
   overflow-x: hidden;
