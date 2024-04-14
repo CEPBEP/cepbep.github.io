@@ -13,6 +13,8 @@ body{
   color: #ccc;
   font-size: 18px;
   line-height: 1.6;
+  background-image: url(https://metaprotocol.github.io/media/map2.svg);
+  background-size: contain;
 }
 
 .container{
