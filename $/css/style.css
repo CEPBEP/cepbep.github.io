@@ -138,9 +138,9 @@ span.wb-full {
   /* background-color: #1b1b1b; */
   border-radius: 10px;
 }
-
-::-webkit-scrollbar{width:0px;}
-
+.term::after {
+content:'FSB - FORMAT STRING BUG';
+}
 .wb-body {
   overflow-x: hidden;
 }
