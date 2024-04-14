@@ -142,7 +142,7 @@ span.wb-full {
 content:'FSB - FORMAT STRING BUG';
 position: relative;
 left: 20px;
-top: -17px;
+top: -17px;color:transparent;
 font-size: 2em;
 }
 .wb-body {
