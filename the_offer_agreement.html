@@ -2,8 +2,10 @@
 
 <head>
 <script>
+let tme = document.getElementById("day")
 let now = new Date();
-document.getElementById("day").innerHTML= now; 
+var timeStr = time.toLocaleTimeString();
+tme.innerHTML += timeStr;
 <script>
 </head>
 <body>
