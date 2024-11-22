@@ -74,7 +74,7 @@ function setTime(){
 	var sec = now.getSeconds() >= 10 ? now.getSeconds() : "0" + now.getSeconds();
 	
 // Get Date
-	$('.day').html(dayToStr(dd));
+	$('.day').html('«'+ dayToStr(dd)+'»');
 	$('.date').html(dd + " " + monthToStr(mm) + " " + year);
 	$('.time').html(hour + ":" + min + ":" + sec);
 };
