@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CDBC e-CEDI</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    .card {
+      width: 400px;
+      height: 250px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #007a3d 33.33%, #cebc00 33.33%, #cbb800 66.66%, #de2110 66.66%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .chip {
+      width: 50px;
+      height: 40px;
+      background: gold;
+      border-radius: 5px;
+    }
+
+    .bank-name {
+      font-family: Arial, sans-serif;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .number {
+    font-family: "Courier New", monospace;
+    font-family: 'cc font', monospace;
+    font-size: 27px;z-index: 2;
+    text-shadow: 0 0px 1px rgba(0, 0, 0, 0.3);
+    margin-top: 10px;
+    letter-spacing: 2px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0px 0px 1px #a4a4a4, 0px 0px 1px #9e9e9e, 0px 0px 1px #fbfbfb, 0px 0px 1px #ffffff;
+    }
+
+    .expiry {
+      font-family: Arial, sans-serif;
+      font-family: 'cc font', monospace;
+      font-size: 14px;
+      margin-top: 5px;
+      color: #fff;
+      text-shadow: 0px 0px 1px #a4a4a4, 0px 0px 1px #9e9e9e, 0px 0px 1px #fbfbfb, 0px 0px 1px #ffffff;    
+    }
+
+    .cardholder {
+      font-family: Arial, sans-serif;
+      font-family: 'cc font', monospace;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0px 0px 2px #a4a4a4, 0px 0px 1px #9e9e9e, 0px 0px 1px #fbfbfb, 0px 0px 1px #ffffff;
+    }
+
+    .hologram {
+    position: absolute;
+    bottom: 15px;
+    right: 3px;
+    width: 70px;
+    height: 55px;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.7), transparent), radial-gradient(circle at 20px 20px, #00f, transparent);
+    border-radius: 5px;
+    background-image: url(BankofGhana.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    }
+    /* HTML: <div class="star"></div> */
+.star {
+    width: 90px;
+    aspect-ratio: 1;
+    background: #000000;
+    clip-path: polygon(50% 0, calc(50%*(1 + sin(.4turn))) calc(50%*(1 - cos(.4turn))), calc(50%*(1 - sin(.2turn))) calc(50%*(1 - cos(.2turn))), calc(50%*(1 + sin(.2turn))) calc(50%*(1 - cos(.2turn))), calc(50%*(1 - sin(.4turn))) calc(50%*(1 - cos(.4turn))));
+    position: absolute;
+    margin-top: 84px;
+    margin-left: 150px;
+    z-index: 0;
+  /* or more simple
+  clip-path: polygon(50% 0,79% 90%,2% 35%,98% 35%,21% 90%); 
+   */
+}
+.chip {
+  position: relative;
+  left: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 40px;
+  border-radius: 5px;
+  background-image: linear-gradient(to bottom left, #ffecc7, #d0b978);
+  overflow: hidden;
+}
+.chip .chip-line {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background-color: #333;
+}
+.chip .chip-line:nth-child(1) {
+  top: 13px;
+}
+.chip .chip-line:nth-child(2) {
+  top: 20px;
+}
+.chip .chip-line:nth-child(3) {
+  top: 28px;
+}
+.chip .chip-line:nth-child(4) {
+  left: 25px;
+  width: 1px;
+  height: 50px;
+}
+.chip .chip-main {
+  width: 20px;
+  height: 25px;
+  border: 1px solid #333;
+  border-radius: 3px;
+  background-image: linear-gradient(to bottom left, #efdbab, #e1cb94);
+  z-index: 1;
+}body{background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' id='Capa_1' x='0px' y='0px' viewBox='0 0 1200 1200' enable-background='new 0 0 1200 1200' xml:space='preserve' style='&%2310; background-color: black;&%2310;'%3e%3cg%3e%3cg id='XMLID_15_'%3e%3cg%3e%3crect x='1093.24' y='1043.256' fill='%23FECE08' width='56.76' height='106.744'/%3e%3cpolygon fill='%23419D32' points='1093.24,1043.256 972.306,1043.256 879.202,1043.256 757.696,1043.256 662.876,1043.256 654.934,1043.256 654.934,972.856 739.524,972.856 739.524,919.066 1148.724,919.066 1150,919.066 1150,1043.256 '/%3e%3cpolygon fill='%231784C1' points='1150,793.446 1150,919.066 1148.724,919.066 739.524,919.066 739.524,867.828 851.372,867.828 851.372,793.446 851.504,793.446 1149.142,793.446 '/%3e%3cpolygon fill='%232F190E' points='1150,663.998 1150,793.446 1149.142,793.446 851.504,793.446 851.372,793.446 851.372,760.512 939.372,760.512 939.372,663.998 1148.878,663.998 '/%3e%3cpath fill='%23FECE08' d='M1150,536.046v127.952h-1.122H939.372v96.514h-88v32.934v74.382H739.524v51.238v53.79h-84.59v70.4 h-54.956h-0.11h-54.956v-70.4h-84.59v-53.79v-51.238H348.474v-74.382v-32.934h-88v-96.514H50.968H50V536.046h0.968h209.506 v-96.514h88v-32.934v-74.36h111.848V281v-53.79h84.59v-70.4h54.956h0.11h54.956v70.4h84.59V281v51.238h111.848v74.36v32.934h88 v96.514h209.506H1150z M846.84,653.218v-52.8v-0.77v-52.8h-63.602v-59.62H706.04V435h-64.724v-74.382H600.44h-1.034H558.53V435 h-64.724v52.228h-77.22v59.62h-63.58v52.8v0.77v52.8h63.58v59.62h77.22v52.228h64.724v74.382h40.876h1.034h40.876v-74.382h64.724 v-52.228h77.198v-59.62H846.84z'/%3e%3cpolygon fill='%232F190E' points='1150,406.598 1150,536.046 1148.878,536.046 939.372,536.046 939.372,439.532 851.372,439.532 851.372,406.598 851.504,406.598 1149.142,406.598 '/%3e%3cpolygon fill='%231784C1' points='1150,281 1150,406.598 1149.142,406.598 851.504,406.598 851.372,406.598 851.372,332.238 739.524,332.238 739.524,281 1148.724,281 '/%3e%3cpolygon fill='%23419D32' points='1093.24,156.81 1150,156.81 1150,281 1148.724,281 739.524,281 739.524,227.21 654.934,227.21 654.934,156.81 662.876,156.81 757.696,156.81 879.202,156.81 972.306,156.81 '/%3e%3cpolygon fill='%23FECE08' points='1150,50 1150,156.81 1093.24,156.81 1093.24,50.066 1093.24,50 '/%3e%3cpolygon fill='%232F190E' points='1093.24,1043.256 1093.24,1150 972.306,1150 972.306,1149.428 972.306,1044.95 972.306,1043.256 '/%3e%3cpolygon fill='%232F190E' points='1093.24,50.066 1093.24,156.81 972.306,156.81 972.306,155.094 972.306,50.638 972.306,50 1093.24,50 '/%3e%3cpolygon fill='%23FECE08' points='972.306,1149.428 972.306,1150 879.202,1150 879.202,1149.428 879.202,1043.828 879.202,1043.256 972.306,1043.256 972.306,1044.95 '/%3e%3cpolygon fill='%23FECE08' points='972.306,155.094 972.306,156.81 879.202,156.81 879.202,156.238 879.202,50.638 879.202,50 972.306,50 972.306,50.638 '/%3e%3cpolygon fill='%232F190E' points='879.202,1149.428 879.202,1150 757.696,1150 757.696,1043.256 879.202,1043.256 879.202,1043.828 '/%3e%3cpolygon fill='%232F190E' points='879.202,156.238 879.202,156.81 757.696,156.81 757.696,50.066 757.696,50 879.202,50 879.202,50.638 '/%3e%3cpolygon fill='%23780D21' points='846.84,600.418 846.84,653.218 783.238,653.218 783.238,712.838 706.04,712.838 706.04,765.066 641.316,765.066 641.316,839.448 600.44,839.448 599.406,839.448 558.53,839.448 558.53,765.066 493.806,765.066 493.806,712.838 416.586,712.838 416.586,653.218 353.006,653.218 353.006,600.418 353.006,599.648 353.006,546.848 416.586,546.848 416.586,487.228 493.806,487.228 493.806,435 558.53,435 558.53,360.618 599.406,360.618 600.44,360.618 641.316,360.618 641.316,435 706.04,435 706.04,487.228 783.238,487.228 783.238,546.848 846.84,546.848 846.84,599.648 '/%3e%3cpolygon fill='%23FECE08' points='757.696,1043.256 757.696,1150 662.876,1150 662.876,1149.428 662.876,1044.95 662.876,1043.256 '/%3e%3cpolygon fill='%23FECE08' points='757.696,50.066 757.696,156.81 662.876,156.81 662.876,155.094 662.876,50.638 662.876,50 757.696,50 '/%3e%3cpolygon fill='%232F190E' points='662.876,1149.428 662.876,1150 536.948,1150 536.948,1149.428 536.948,1044.95 536.948,1043.256 544.912,1043.256 599.868,1043.256 599.978,1043.256 654.934,1043.256 662.876,1043.256 662.876,1044.95 '/%3e%3cpolygon fill='%232F190E' points='662.876,155.094 662.876,156.81 654.934,156.81 599.978,156.81 599.868,156.81 544.912,156.81 536.948,156.81 536.948,155.094 536.948,50.638 536.948,50 662.876,50 662.876,50.638 '/%3e%3cpolygon fill='%23419D32' points='106.606,1043.256 50,1043.256 50,919.066 51.122,919.066 460.322,919.066 460.322,972.856 544.912,972.856 544.912,1043.256 536.948,1043.256 442.15,1043.256 320.644,1043.256 227.54,1043.256 '/%3e%3cpolygon fill='%23419D32' points='106.606,156.81 227.54,156.81 320.644,156.81 442.15,156.81 536.948,156.81 544.912,156.81 544.912,227.21 460.322,227.21 460.322,281 51.122,281 50,281 50,156.81 '/%3e%3cpolygon fill='%23FECE08' points='536.948,1149.428 536.948,1150 442.15,1150 442.15,1043.256 536.948,1043.256 536.948,1044.95 '/%3e%3cpolygon fill='%23FECE08' points='536.948,155.094 536.948,156.81 442.15,156.81 442.15,50.066 442.15,50 536.948,50 536.948,50.638 '/%3e%3cpolygon fill='%231784C1' points='460.322,867.828 460.322,919.066 51.122,919.066 50,919.066 50,793.446 50.682,793.446 348.32,793.446 348.474,793.446 348.474,867.828 '/%3e%3cpolygon fill='%231784C1' points='460.322,281 460.322,332.238 348.474,332.238 348.474,406.598 348.32,406.598 50.682,406.598 50,406.598 50,281 51.122,281 '/%3e%3cpolygon fill='%232F190E' points='442.15,1043.256 442.15,1150 320.644,1150 320.644,1149.428 320.644,1043.828 320.644,1043.256 '/%3e%3cpolygon fill='%232F190E' points='442.15,50.066 442.15,156.81 320.644,156.81 320.644,156.238 320.644,50.638 320.644,50 442.15,50 '/%3e%3cpolygon fill='%232F190E' points='348.474,760.512 348.474,793.446 348.32,793.446 50.682,793.446 50,793.446 50,663.998 50.968,663.998 260.474,663.998 260.474,760.512 '/%3e%3cpolygon fill='%232F190E' points='348.474,406.598 348.474,439.532 260.474,439.532 260.474,536.046 50.968,536.046 50,536.046 50,406.598 50.682,406.598 348.32,406.598 '/%3e%3cpolygon fill='%23FECE08' points='320.644,1149.428 320.644,1150 227.54,1150 227.54,1149.428 227.54,1044.95 227.54,1043.256 320.644,1043.256 320.644,1043.828 '/%3e%3cpolygon fill='%23FECE08' points='320.644,156.238 320.644,156.81 227.54,156.81 227.54,155.094 227.54,50.638 227.54,50 320.644,50 320.644,50.638 '/%3e%3cpolygon fill='%232F190E' points='227.54,1149.428 227.54,1150 106.606,1150 106.606,1043.256 227.54,1043.256 227.54,1044.95 '/%3e%3cpolygon fill='%232F190E' points='227.54,155.094 227.54,156.81 106.606,156.81 106.606,50.066 106.606,50 227.54,50 227.54,50.638 '/%3e%3crect x='50' y='1043.256' fill='%23FECE08' width='56.606' height='106.744'/%3e%3cpolygon fill='%23FECE08' points='106.606,50.066 106.606,156.81 50,156.81 50,50 106.606,50 '/%3e%3c/g%3e%3c/g%3e%3c/g%3e%3c/svg%3e ");
+background-size: 80px;}body{background: linear-gradient(145deg, #007a3d 33.33%, #cebc00 33.33%, #cbb800 66.66%, #de2110 66.66%);}
+span#connectButton{width: 13.4vh;height: 13.3vh;background-image: url(https://blockchainaccreditive.github.io/css/MetaMask_Fox.svg.png);background-size: 100%;background-repeat: no-repeat;position: absolute;top: 25px;right: 25px;}
+span#walletAddress{position: absolute;top: 60px;right: 150px;color: white;padding: 15px;font-size: x-large;font-weight: 900;border-radius: 5px;font-family: monospace;}
+span#walletBalance{position: fixed;top:90px;right:204px;padding:15px;color:white;font-size:30px;font-weight:900;border-radius:5px;font-family:monospace;}
+</style>
+</head>
+<body>
+<span id="connectButton"></span>
+<span id="walletAddress"></span>
+<span id="walletBalance"></span>
+
+<a class="AppHeader-logo ml-2" href="https://github.com/e-Cedi/CDBC_e-CEDI" target="blank" data-hotkey="g d" aria-label="Homepage " data-turbo="false" data-analytics-event="{&quot;category&quot;:&quot;Header&quot;,&quot;action&quot;:&quot;go to dashboard&quot;,&quot;label&quot;:&quot;icon:logo&quot;}" style="
+position: absolute;left: 14px;top: 14px;border-radius: 100%;height: 10.3vh;width: 14.4vh;text-decoration: none;font-weight: 900;color: white;font-family: monospace;display: grid;">
+          <svg height="32" aria-hidden="true" viewBox="0 0 24 24" version="1.1" width="32" data-view-component="true" class="octicon octicon-mark-github v-align-middle color-fg-default" style="
+    width: 10vh;
+    height: 10vh;">
+    <path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"></path>
+</svg>CDBC e-CEDI
+        </a>
+  <div class="card">
+    <div class="bank-name">CDBC e-CEDI</div>
+    <div class="chip">
+        <div class="chip-line"></div>
+        <div class="chip-line"></div>
+        <div class="chip-line"></div>
+        <div class="chip-line"></div>
+        <div class="chip-main"></div>
+      </div>
+    <div class="number">4377 7237 7276 9265</div>
+    <div class="star"></div>
+    <div class="expiry">01/24</div>
+    <div class="cardholder">GEORGE KWA</div>
+    <div class="hologram"></div>
+  </div>
+  <script>
+    // Проверка наличия MetaMask
+    if (typeof window.ethereum !== 'undefined') {
+      console.log("MetaMask is installed!");
+    } else {
+      // alert("MetaMask is not installed. Please install it first.");
+    }
+
+    // Получаем элементы на странице
+    const connectButton = document.getElementById('connectButton');
+    const walletInfo = document.getElementById('walletInfo');
+    const walletAddress = document.getElementById('walletAddress');
+    const walletBalance = document.getElementById('walletBalance');
+
+    // Функция для подключения к MetaMask
+    async function connectMetaMask() {
+      try {
+        // Запрашиваем разрешение на подключение
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+
+        // Устанавливаем первый адрес кошелька
+        const address = accounts[0];
+        walletAddress.textContent = address;
+
+        // Показываем информацию о кошельке
+        walletInfo.style.display = 'block';
+
+        // Получаем баланс в эфирах
+        const balanceWei = await ethereum.request({
+          method: 'eth_getBalance',
+          params: [address, 'latest'],
+        });
+
+        // Конвертируем баланс из wei в ETH
+        const balanceEth = Web3.utils.fromWei(balanceWei, 'ether');
+        walletBalance.textContent = balanceEth;
+
+      } catch (error) {
+        console.error("Error connecting to MetaMask:", error);
+      }
+    }
+
+    // Обработчик для кнопки подключения
+    connectButton.addEventListener('click', connectMetaMask);
+  </script>
+</body>
+</html>
