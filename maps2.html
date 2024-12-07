@@ -58,3 +58,62 @@
     </script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Яндекс Карта с метками</title>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=2e6dd6ab-814c-44fc-86a3-2b81fb30751" type="text/javascript"></script>
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Яндекс Карта с метками месторождений</h1>
+    <div id="map"></div>
+
+    <script type="text/javascript">
+        ymaps.ready(init);
+
+        function init() {
+            // Создаем карту с тёмной темой
+            var map = new ymaps.Map("map", {
+                center: [61.5240, 105.3180], // Центральная точка карты (Россия)
+                zoom: 4,
+                controls: ['zoomControl', 'searchControl'],
+                type: 'yandex#dark'  // Устанавливаем тёмную тему карты
+            });
+
+            // Добавление меток
+            var placemarks = [
+                {coords: [66.750833, 80.498889], name: "Русское"},
+                {coords: [61.591111, 112.986667], name: "Среднеботуобинское"},
+                {coords: [67.3167, 76.3500], name: "Уренгойское"},
+                {coords: [65.7333, 78.2333], name: "Береговое"},
+                {coords: [61.4003, 67.2797], name: "Каменное"},
+                {coords: [65.1847, 80.5822], name: "Кынское"},
+                {coords: [72.0000, 85.0000], name: "Западно-иркинское"},
+                {coords: [57.7000, 107.8667], name: "Северо Даниловское"},
+                {coords: [64.7507, 75.4988], name: "Северо-комсомольское"},
+                {coords: [67.3347, 82.9990], name: "Тагульское Приразломное"},
+                {coords: [52.5833, 143.7167], name: "Аркутун Дагинское"}
+                // Добавьте остальные метки в формате {coords: [широта, долгота], name: "Название"}
+            ];
+
+            // Создаем метки на карте
+            placemarks.forEach(function (placemark) {
+                var marker = new ymaps.Placemark(placemark.coords, {
+                    balloonContent: placemark.name
+                });
+
+                map.geoObjects.add(marker);
+            });
+        }
+    </script>
+</body>
+</html>
