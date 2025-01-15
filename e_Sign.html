@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подпись через CryptoPro</title>
+    <script>
+        function signDataWithCSP() {
+            try {
+                var csp = new ActiveXObject("CryptoPro.CSP");
+                var cert = csp.getCertificate("Тема вашего сертификата");
+
+                if (!cert) {
+                    alert("Не удалось найти сертификат");
+                    return;
+                }
+
+                var data = "Данные для подписания";
+
+                // Подписание данных
+                var signature = csp.signData(data, cert);
+                alert("Подпись: " + signature);
+            } catch (e) {
+                alert("Ошибка: " + e.message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Подпись через CryptoPro CSP</h1>
+    <button onclick="signDataWithCSP()">Подписать документ</button>
+</body>
+</html>
