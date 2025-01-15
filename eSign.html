@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подпись на флэшке</title>
+</head>
+<body>
+    <h1>Подпись документа</h1>
+    
+    <input type="file" id="fileInput" />
+    <button id="signButton">Подписать</button>
+    
+    <div id="signatureOutput"></div>
+    
+    <script>
+        // Получение кнопки и области вывода
+        const signButton = document.getElementById('signButton');
+        const signatureOutput = document.getElementById('signatureOutput');
+        
+        // Обработчик подписания
+        signButton.addEventListener('click', async () => {
+            try {
+                const fileInput = document.getElementById('fileInput');
+                if (fileInput.files.length === 0) {
+                    signatureOutput.textContent = 'Выберите файл для подписания';
+                    return;
+                }
+
+                const file = fileInput.files[0];
+                const arrayBuffer = await file.arrayBuffer();
+                
+                // Пример использования WebCrypto API для создания подписи
+                const signature = await signData(arrayBuffer);
+                signatureOutput.textContent = `Подпись: ${signature}`;
+            } catch (error) {
+                console.error('Ошибка при подписании:', error);
+                signatureOutput.textContent = 'Ошибка при подписании';
+            }
+        });
+
+        // Пример функции подписания (для упрощения использована симуляция)
+        async function signData(data) {
+            // Имитация подписания с использованием WebCrypto API
+            const encoder = new TextEncoder();
+            const dataToSign = encoder.encode('Тестирование подписи: ' + data.byteLength);
+            
+            const privateKey = await window.crypto.subtle.generateKey(
+                {
+                    name: 'RSASSA-PKCS1-v1_5',
+                    modulusLength: 2048,
+                    publicExponent: new Uint8Array([1, 0, 1]),
+                    hash: { name: 'SHA-256' },
+                },
+                true,
+                ['sign']
+            );
+            
+            const signature = await window.crypto.subtle.sign(
+                { name: 'RSASSA-PKCS1-v1_5' },
+                privateKey,
+                dataToSign
+            );
+            
+            return Array.from(new Uint8Array(signature)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+    </script>
+</body>
+</html>
