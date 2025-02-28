@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Biomass Analysis System</title>
+
     <style>
         .container {
             display: flex;
