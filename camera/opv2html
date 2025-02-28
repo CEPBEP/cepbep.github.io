@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>Biomass Analysis System</title>
 
+<style>
+#style {visibility:visible;}
+</style>
+
     <style>
         .container {
             display: flex;
