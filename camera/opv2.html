@@ -50,10 +50,10 @@
     <div id="result"></div>
 
     <!-- Используйте локальный файл opencv.js -->
-    <script async src="js/opencv.js" type="text/javascript"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/opencv@7.0.0/lib/opencv.min.js" type="text/javascript"></script>
     <script>
         function onOpenCVReady() {
-            console.log("OpenCV.js успешно загружен!");
+            console.log("OpenCV успешно загружен!");
 
             // Инициализация элементов
             const video = document.getElementById('video');
@@ -157,7 +157,7 @@
         if (typeof cv !== 'undefined') {
             onOpenCVReady();
         } else {
-            console.log("OpenCV.js ещё не загружен, ожидание...");
+            console.log("OpenCV не загружен, ожидание...");
             // Ожидание загрузки OpenCV.js
             let checkOpenCV = setInterval(() => {
                 if (typeof cv !== 'undefined') {
