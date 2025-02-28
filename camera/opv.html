@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Biomass Analysis System</title>
+    <style>
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+        #videoContainer, #dropZone {
+            border: 2px dashed #333;
+            padding: 15px;
+            min-width: 640px;
+            min-height: 480px;
+        }
+        #result {
+            padding: 20px;
+            font-size: 1.2em;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Анализатор биомассы растений</h1>
+    <div class="container">
+        <div>
+            <div id="videoContainer">
+                <video id="video" width="640" height="480" autoplay></video>
+                <canvas id="canvas" class="hidden"></canvas>
+            </div>
+            <button id="startButton">Запустить камеру</button>
+            <button id="captureButton" class="hidden">Анализировать кадр</button>
+        </div>
+        
+        <div id="dropZone">
+            Перетащите изображение сюда<br>
+            или<br>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+    </div>
+    <div id="result"></div>
+
+    <script async src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
+    <script>
+        // Инициализация элементов
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const resultDiv = document.getElementById('result');
+        
+        // Запуск камеры
+        document.getElementById('startButton').onclick = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                document.getElementById('captureButton').classList.remove('hidden');
+            } catch (err) {
+                console.error('Ошибка доступа к камере:', err);
+            }
+        };
+
+        // Анализ кадра с камеры
+        document.getElementById('captureButton').onclick = () => {
+            ctx.drawImage(video, 0, 0, 640, 480);
+            analyzeImage(canvas);
+        };
+
+        // Обработка перетаскивания файлов
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#eee';
+        };
+
+        dropZone.ondragleave = () => {
+            dropZone.style.backgroundColor = 'transparent';
+        };
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            handleImageFile(file);
+        };
+
+        fileInput.onchange = (e) => {
+            handleImageFile(e.target.files[0]);
+        };
+
+        function handleImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, 640, 480);
+                    analyzeImage(canvas);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Основная функция анализа изображения
+        function analyzeImage(canvas) {
+            if (!cv.getBuildInformation) {
+                alert('OpenCV.js не загружен!');
+                return;
+            }
+
+            const src = cv.imread(canvas);
+            const dst = new cv.Mat();
+            
+            // Конвертация в HSV
+            cv.cvtColor(src, dst, cv.COLOR_RGBA2RGB);
+            cv.cvtColor(dst, dst, cv.COLOR_RGB2HSV);
+
+            // Определение диапазона зеленого цвета
+            const low = new cv.Mat(dst.rows, dst.cols, dst.type(), [35, 50, 50]);
+            const high = new cv.Mat(dst.rows, dst.cols, dst.type(), [85, 255, 255]);
+            const mask = new cv.Mat();
+            cv.inRange(dst, low, high, mask);
+
+            // Расчет площади зеленых пикселей
+            const totalPixels = mask.rows * mask.cols;
+            const greenPixels = cv.countNonZero(mask);
+            const biomassPercentage = (greenPixels / totalPixels * 100).toFixed(2);
+
+            // Очистка памяти
+            src.delete();
+            dst.delete();
+            low.delete();
+            high.delete();
+            mask.delete();
+
+            // Отображение результата
+            resultDiv.innerHTML = `Обнаруженная биомасса: ${biomassPercentage}%`;
+            
+            // Здесь можно добавить калибровку под конкретную культуру
+            // Например: biomass = greenPixels * calibrationFactor
+        }
+
+        // Периодический анализ для видео
+        setInterval(() => {
+            if (document.getElementById('captureButton').classList.contains('hidden')) return;
+            ctx.drawImage(video, 0, 0, 640, 480);
+            analyzeImage(canvas);
+        }, 1000);
+    </script>
+</body>
+</html>
