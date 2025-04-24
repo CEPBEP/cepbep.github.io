@@ -29,7 +29,7 @@
       align-items: flex-start;
       background: var(--bg);
       color: var(--fg);
-      font-family: 'Roboto Mono', monospace;
+      font-family:monospace;
     }
     .container {
       display: grid;
@@ -109,21 +109,21 @@
   <div class="container">
     <!-- Encoder Card -->
     <div class="card">
-      <h2>Шифратор → ДНК</h2>
+      <h2>Из Данных → в ДНК</h2>
       <textarea id="user-input" placeholder="Введите текст..."></textarea>
       <div class="text-counter">Байты: 0 из 1024</div>
-      <button id="encodeButton" class="button">↻ Encode</button>
+      <button id="encodeButton" class="button">↻ Заморочить</button>
       <div class="output">
-        <textarea id="dna-output" readonly placeholder="Последовательность ДНК..."></textarea>
+        <textarea id="dna-output" readonly placeholder="Любые Цифровые Данные в Виде Последовательности ДНК"></textarea>
       </div>
     </div>
     <!-- Decoder Card -->
     <div class="card">
-      <h2>Дешифратор ← ДНК</h2>
+      <h2>Из ДНК  → в Данные</h2>
       <textarea id="dna-input" placeholder="Вставьте ДНК-последовательность..."></textarea>
-      <button id="decodeButton" class="button">⇦ Decode</button>
+      <button id="decodeButton" class="button">⇦ Разморочить</button>
       <div class="output">
-        <textarea id="decoded-text" readonly placeholder="Расшифрованный текст..."></textarea>
+        <textarea id="decoded-text" readonly placeholder="Любые Цифровые Данные"></textarea>
       </div>
     </div>
   </div>
