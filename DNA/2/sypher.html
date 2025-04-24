@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ДНК Шифратор / Дешифратор</title>
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #151b23;
+      --fg: #fff;
+      --card-bg: #1f2937;
+      --accent: #3498db;
+      --accent2: #2ecc71;
+      --accent3: #f1c40f;
+      --accent4: #9b59b6;
+      --accent5: #e74c3c;
+      --radius: 8px;
+      --transition: 0.3s;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 40px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Roboto Mono', monospace;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition: transform var(--transition);
+    }
+    .card:hover { transform: translateY(-4px); }
+    .card:nth-child(odd) { border-color: var(--accent2); }
+    .card:nth-child(even) { border-color: var(--accent3); }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.5rem;
+      color: var(--fg);
+      border-bottom: 2px solid var(--accent5);
+      padding-bottom: 8px;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      background: #0f131a;
+      border: 1px solid #333;
+      border-radius: var(--radius);
+      resize: vertical;
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .text-counter {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .button {
+      margin-top: 16px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      background: var(--accent);
+      color: #fff;
+    }
+    .button:hover { background: var(--accent5); transform: translateY(-2px); }
+    .button:disabled,
+    .button.disabled {
+      background: #555;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .output {
+      margin-top: 8px;
+    }
+    .output textarea {
+      height: 100px;
+      background: #0f131a;
+    }
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Encoder Card -->
+    <div class="card">
+      <h2>Шифратор → ДНК</h2>
+      <textarea id="user-input" placeholder="Введите текст..."></textarea>
+      <div class="text-counter">Байты: 0 из 1024</div>
+      <button id="encodeButton" class="button">↻ Encode</button>
+      <div class="output">
+        <textarea id="dna-output" readonly placeholder="Последовательность ДНК..."></textarea>
+      </div>
+    </div>
+    <!-- Decoder Card -->
+    <div class="card">
+      <h2>Дешифратор ← ДНК</h2>
+      <textarea id="dna-input" placeholder="Вставьте ДНК-последовательность..."></textarea>
+      <button id="decodeButton" class="button">⇦ Decode</button>
+      <div class="output">
+        <textarea id="decoded-text" readonly placeholder="Расшифрованный текст..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Маппинг 2 бит ↔ нуклеотид
+    const dnaMap = { '00':'A','01':'C','10':'G','11':'T' };
+    const reverseMap = Object.fromEntries(
+      Object.entries(dnaMap).map(([bits,nuc])=>[nuc,bits])
+    );
+    function encodeTextToDNA(text) {
+      const bytes = new TextEncoder().encode(text);
+      let dna = '';
+      for (const byte of bytes) {
+        const bits = byte.toString(2).padStart(8,'0');
+        for (let i=0;i<8;i+=2) dna += dnaMap[bits.substr(i,2)];
+      }
+      return dna;
+    }
+    function decodeDNAToText(dna) {
+      const bits = dna.split('').map(n=>reverseMap[n]||'').join('');
+      const arr = [];
+      for (let i=0;i<bits.length;i+=8) {
+        const byte = bits.substr(i,8);
+        if (byte.length===8) arr.push(parseInt(byte,2));
+      }
+      return new TextDecoder().decode(new Uint8Array(arr));
+    }
+
+    // UI Elements
+    const userInput = document.getElementById('user-input');
+    const dnaOutput = document.getElementById('dna-output');
+    const dnaInput = document.getElementById('dna-input');
+    const decodedText = document.getElementById('decoded-text');
+    const byteCounter = document.querySelector('.text-counter');
+    const encodeBtn = document.getElementById('encodeButton');
+    const decodeBtn = document.getElementById('decodeButton');
+
+    userInput.addEventListener('input', () => {
+      const count = new TextEncoder().encode(userInput.value).length;
+      byteCounter.textContent = `Байты: ${count} из 1024`;
+      if (count>1024) {
+        byteCounter.style.color='var(--accent5)';
+        encodeBtn.disabled = true;
+      } else {
+        byteCounter.style.color='#aaa';
+        encodeBtn.disabled = false;
+      }
+    });
+
+    encodeBtn.addEventListener('click', () => {
+      dnaOutput.value = encodeTextToDNA(userInput.value);
+      localStorage.setItem('lastDNA', dnaOutput.value);
+    });
+
+    decodeBtn.addEventListener('click', () => {
+      decodedText.value = decodeDNAToText(dnaInput.value.trim());
+    });
+
+    // Загрузка последнего значения
+    window.addEventListener('DOMContentLoaded', () => {
+      const last = localStorage.getItem('lastDNA');
+      if (last) dnaOutput.value = last;
+    });
+  </script>
+</body>
+</html>
