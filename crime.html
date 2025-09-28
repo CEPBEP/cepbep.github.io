@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Защита Ислама - Расследование оскорблений религии</title>
+    <style>
+        :root {
+            --primary: #006400;
+            --secondary: #228B22;
+            --accent: #32CD32;
+            --light: #F5F5F5;
+            --dark: #333;
+            --text: #222;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--light);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .logo span {
+            color: var(--accent);
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            max-width: 800px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-top: 0.5rem;
+        }
+        
+        section {
+            padding: 4rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            font-size: 2rem;
+        }
+        
+        .problem {
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            padding: 2rem;
+        }
+        
+        .problem p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .method-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .method-title {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .donation {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-align: center;
+            padding: 4rem 0;
+        }
+        
+        .donation-box {
+            background: white;
+            color: var(--dark);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .donation-title {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .donation-amounts {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .amount-option {
+            flex: 1;
+            min-width: 100px;
+            padding: 1rem;
+            background: var(--light);
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .amount-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .amount-option.selected {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .custom-amount {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        
+        .donate-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+        
+        .donate-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .progress {
+            margin: 2rem 0;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 35%;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .stats {
+                flex-direction: column;
+            }
+            
+            .donation-amounts {
+                flex-direction: column;
+            }
+            
+            .amount-option {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Защита <span>Ислама</span></div>
+                <h1>Расследование оскорблений Ислама и Аллаха</h1>
+                <p class="tagline">Присоединяйтесь к нам в борьбе за уважение к религиозным чувствам мусульман по всему миру</p>
+            </div>
+        </div>
+    </header>
+    
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">1.9 млрд</div>
+                    <div class="stat-label">Мусульман в мире</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24.9%</div>
+                    <div class="stat-label">Населения Земли исповедует Ислам</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">#1</div>
+                    <div class="stat-label">Ислам станет самой многочисленной религией в 21 веке</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <div class="container">
+            <h2 class="section-title">Проблема оскорбления Ислама</h2>
+            <div class="problem">
+                <p>В современном цифровом мире участились случаи оскорбления исламских ценностей, пророка Мухаммеда (мир ему) и Аллаха. Эти действия вызывают глубокую боль у более чем 1.9 миллиарда мусульман по всему миру.</p>
+                <p>Мы верим, что свобода слова не должна превращаться в оскорбление религиозных чувств верующих. Наша миссия - выявлять и пресекать такие действия с помощью современных технологий и юридических методов.</p>
+                <p>По прогнозам исследователей, Ислам станет самой многочисленной религией в мире уже к середине 21 века. Уважение к религиозным чувствам такой значительной части человечества - это вопрос глобальной гармонии и взаимопонимания.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <div class="container">
+            <h2 class="section-title">Методы расследования</h2>
+            <div class="methods">
+                <div class="method-card">
+                    <h3 class="method-title">Установление личностей</h3>
+                    <p>Идентификация лиц, скрывающихся за анонимными аккаунтами, с использованием современных методов цифровой криминалистики.</p>
+                </div>
+                <div class="method-card">
+                    <h3 class="method-title">Восстановление историй сообщений</h3>
+                    <p>Восстановление удаленного контента и истории переписок для сбора доказательств оскорбительных действий.</p>
+                </div>
+                <div class="method-card">
+                    <h3 class="method-title">Стилометрия</h3>
+                    <p>Анализ стилистических особенностей текста для идентификации авторов оскорбительных материалов.</p>
+                </div>
+                <div class="method-card">
+                    <h3 class="method-title">Reverse Shell</h3>
+                    <p>Использование методов кибербезопасности для отслеживания источников вредоносного контента.</p>
+                </div>
+                <div class="method-card">
+                    <h3 class="method-title">Другие ОРМ методы</h3>
+                    <p>Применение оперативно-розыскных мероприятий для сбора информации и доказательной базы.</p>
+                </div>
+                <div class="method-card">
+                    <h3 class="method-title">Юридическое сопровождение</h3>
+                    <p>Подача исков в суды и взаимодействие с правоохранительными органами для привлечения виновных к ответственности.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="donation">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Поддержите нашу миссию</h2>
+            <div class="donation-box">
+                <h3 class="donation-title">Сделайте пожертвование</h3>
+                <p>Каждое пожертвование помогает нам финансировать расследования, юридические процессы и образовательные программы по защите исламских ценностей.</p>
+                
+                <div class="progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>Собрано: 350,000 руб.</span>
+                        <span>Цель: 1,000,000 руб.</span>
+                    </div>
+                </div>
+                
+                <div class="donation-amounts">
+                    <div class="amount-option">500 руб.</div>
+                    <div class="amount-option">1000 руб.</div>
+                    <div class="amount-option">2500 руб.</div>
+                    <div class="amount-option">5000 руб.</div>
+                </div>
+                
+                <input type="text" class="custom-amount" placeholder="Другая сумма">
+                
+                <button class="donate-btn">Пожертвовать сейчас</button>
+                
+                <p style="margin-top: 1rem; font-size: 0.9rem;">Все пожертвования защищены и обрабатываются безопасно.</p>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">Защита <span>Ислама</span></div>
+                <p>Мы работаем для защиты религиозных чувств мусульман и продвижения взаимного уважения между всеми людьми.</p>
+                <div class="contact-info">
+                    <!--<div>Email: info@zashchita-islam.ru</div>-->
+                    <div>Телефон: +7 (977) 886-06-57</div>
+                </div>
+                <p>&copy; 2025 Защита Ислама. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountOptions = document.querySelectorAll('.amount-option');
+            const customAmount = document.querySelector('.custom-amount');
+            
+            amountOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    amountOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    customAmount.value = '';
+                });
+            });
+            
+            customAmount.addEventListener('focus', function() {
+                amountOptions.forEach(opt => opt.classList.remove('selected'));
+            });
+            
+            document.querySelector('.donate-btn').addEventListener('click', function() {
+                let amount = '';
+                
+                const selectedOption = document.querySelector('.amount-option.selected');
+                if (selectedOption) {
+                    amount = selectedOption.textContent;
+                } else if (customAmount.value) {
+                    amount = customAmount.value + ' руб.';
+                }
+                
+                if (amount) {
+                    alert(`Спасибо за ваше пожертвование в размере ${amount}! Мы свяжемся с вами для подтверждения.`);
+                } else {
+                    alert('Пожалуйста, выберите или введите сумму пожертвования.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
