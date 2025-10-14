@@ -11,152 +11,117 @@
       <meta property="og:image" content="https://humanphenotype.github.io/img/rm.jpg" />
       <meta name="twitter:image" content="https://humanphenotype.github.io/img/rm.jpg" />
       <meta name="twitter:card" content="summary_large_image" />
+<!--
+  Файл: окончательная версия эффекта портала.
+
+  Что изменено по запросу:
+  1) Частицы анимируются гораздо плавнее — для этого каждая частица имеет две вложенные обёртки:
+     - внешний блок (.particle) отвечает за перемещение (взрыв/сборка) и opacity,
+     - внутренний блок (.particle-inner) отвечает за плавное "плавание" (float) и мерцание.
+     Такой раздел ответственности позволяет плавно комбинировать движение и плавающую анимацию без скачков.
+
+  2) Последовательность событий:
+     - сначала появляются частицы (быстро разлетаются наружу);
+     - затем через 220ms появляется GIF-портал (частицы остаются поверх GIF);
+     - через 1500ms после появления GIF частицы собираются и исчезают плавно.
+
+  3) Частицы стали более разнообразными (разные размеры, формы, цвета, длительности плавающей анимации).
+
+  4) Звук: добавлен WebAudio-плейсхолдер — короткий звук появления и плавный циклический звук "работы" портала.
+     Позже вы можете заменить его на MP3/OGG. В коде отмечено, где вставить внешние аудио-файлы.
+
+  5) Подробные комментарии на русском языке по коду вложены прямо в документ.
+-->
+
 <style>
   :root { --size: 340px; --perspective: 900px; --max-tilt: 22deg; --transition: 0.12s; --cursor-size: 92px; }
-  ::-webkit-scrollbar { width: 0px; }
+  ::-webkit-scrollbar{ width:0; }
 
+  /* Прячем системный курсор — используем кастомный */
   body { cursor: none; margin: 0; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-  body {
-    min-height: 100vh;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(180deg,#071024 0%, #081426 60%);
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue";
-    color: #e6eef8;
-    perspective: 1200px;
-    touch-action: manipulation;
-    background:black;
+  body{
+    min-height:100vh; display:grid; place-items:center; background: #000; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue"; color:#e6eef8; touch-action: manipulation;
   }
 
-  .card {
-    width: var(--size);
-    height: var(--size);
-    display: grid;
-    place-items: center;
-    border-radius: 18px;
-    padding: 22px;
-  /*background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    box-shadow: 0 8px 30px rgba(3,8,20,0.6);*/
+  .card{ width:var(--size); height:var(--size); display:grid; place-items:center; padding:22px; }
+  .viewer{ width:100%; height:100%; perspective:var(--perspective); display:grid; place-items:center; cursor:none; }
+  .model{ width:76%; height:76%; transform-style: preserve-3d; transition: transform var(--transition) ease-out; will-change:transform; }
+  svg{ width:100%; height:100%; display:block; }
+
+  /* Курсор — всегда виден */
+  .cursor-icon{
+    position: fixed; left:0; top:0; width:var(--cursor-size); height:var(--cursor-size);
+    pointer-events: none; transform: translate3d(-50%,-50%,0); transition: opacity 0.12s linear, transform 120ms linear; z-index:100010;
+    display:grid; place-items:center; user-select:none; opacity:1; backface-visibility:hidden;
+  }
+  .cursor-icon svg{ width:100%; height:100%; display:block; transform-origin:50% 50%; transform-style: preserve-3d; }
+
+  /* Контейнер эффектов */
+  .click-effect{ position: fixed; left:0; top:0; pointer-events:none; z-index:100005; }
+
+  /* Внешняя оболочка частицы — отвечает за движение (взрыв, сборка) и opacity */
+  .particle{
+    position:absolute; left:0; top:0; width:12px; height:12px; pointer-events:none; transform: translate3d(-50%,-50%,0) translate3d(0,0,0) scale(1);
+    opacity:0; will-change: transform, opacity; z-index:100020; /* частицы выше GIF */
+    transition: transform 700ms cubic-bezier(.16,.84,.35,1), opacity 420ms linear;
   }
 
-  .viewer {
-    width: 100%;
-    height: 100%;
-    perspective: var(--perspective);
-    display: grid;
-    place-items: center;
-    cursor: none;
-  }
+  /* Внутренняя часть частицы — визуал, отвечает за плавающую анимацию и мерцание */
+  .particle-inner{ width:100%; height:100%; border-radius:50%; overflow:hidden; will-change: transform, opacity, filter; }
 
-  .model {
-    width: 76%;
-    height: 76%;
-    transform-style: preserve-3d;
-    transition: transform var(--transition) ease-out;
-    will-change: transform;
-  }
+  /* Плавная плавающая анимация: небольшое вертикальное смещение и нежное вращение */
+  @keyframes floatSmooth { 0%{ transform: translateY(0) rotate(0deg); } 50%{ transform: translateY(-6%) rotate(180deg); } 100%{ transform: translateY(0) rotate(360deg); } }
+  @keyframes shimmerSmooth { 0%{ filter:brightness(0.9); } 50%{ filter:brightness(1.15); } 100%{ filter:brightness(0.9); } }
 
-  .layer {
-    transform-box: fill-box;
-    transform-origin: 50% 50%;
-    will-change: transform, filter;
-    transition: transform var(--transition) ease-out;
-    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45));
-  }
+  /* GIF overlay (портал) — чуть ниже по z-index, чтобы частицы оставались поверх */
+  .gif-overlay{ position:fixed; left:0; top:0; width:140px; height:140px; transform: translate3d(-50%,-50%,0) scale(0.6); opacity:0; pointer-events:none; z-index:100010; transition: transform 260ms cubic-bezier(.22,.9,.25,1), opacity 260ms linear; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.45); display:grid; place-items:center; }
+  .gif-overlay img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .gif-overlay.show{ opacity:1; transform: translate3d(-50%,-50%,0) scale(1); }
 
-  .rim {
-    mix-blend-mode: screen;
-    opacity: 0.0;
-    transition: opacity 0.15s;
-    pointer-events: none;
-  }
-
-  .hint {
-    margin-top: 12px;
-    font-size: 13px;
-    color: #99a7c9;
-    text-align: center;
-  }
-
-  /* кастомный SVG-курсок — теперь всегда видим на всех устройствах */
-  .cursor-icon {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: var(--cursor-size);
-    height: var(--cursor-size);
-    pointer-events: none;
-    transform: translate3d(-50%,-50%,0);
-    transition: opacity 0.12s linear, transform 120ms linear;
-    z-index: 99999;
-    will-change: transform, opacity;
-    display: grid;
-    place-items: center;
-    user-select: none;
-    mix-blend-mode: normal;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    opacity: 1; /* всегда видим */
-  }
-
-  /* если fetch SVG не сработал, в документе есть запасной inline fallback */
-  .cursor-icon svg { width: 100%; height: 100%; display:block; transform-origin:50% 50%; transform-style: preserve-3d; }
-
-  /* частицы и GIF overlay */
-  .click-effect { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 99998; }
-  .particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; transform: translate(-50%, -50%) scale(0.9); opacity: 0.0; will-change: transform, opacity; }
-  .gif-overlay { position: fixed; left: 0; top: 0; width: 140px; height: 140px; transform: translate3d(-50%,-50%,0) scale(0.6); opacity: 0; pointer-events: none; z-index: 99999; will-change: transform, opacity; transition: transform 260ms cubic-bezier(.22,.9,.25,1), opacity 260ms linear; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.45); background: transparent; display: grid; place-items: center; }
-  .gif-overlay img { width: 100%; height: 100%; display:block; object-fit: cover; pointer-events: none; }
-  .gif-overlay.show { opacity: 1; transform: translate3d(-50%,-50%,0) scale(1); }
-  svg { width:100%; height:100%; display:block; }
-  @media (max-width:520px) { :root { --cursor-size: 72px; --size: 260px; --max-tilt: 14deg; --perspective: 700px; } .gif-overlay { width: 108px; height: 108px; } }
+  /* Медиа-адаптация */
+  @media (max-width:520px){ :root{ --cursor-size:72px; --size:260px; --max-tilt:14deg; --perspective:700px; } .gif-overlay{ width:108px; height:108px; } }
 </style>
 </head>
 <body>
+
   <div class="card">
     <div class="viewer" id="viewer">
       <div class="model" id="model" aria-hidden="true">
-        <!-- Простая placeholder модель (можно заменить) -->
-        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3D demo">
-          <g class="layer" data-z="0">
-            <circle cx="100" cy="90" r="48" fill="#ff8b3d" stroke="#b85b12" stroke-width="3"></circle>
-          </g>
-          <g class="rim layer" data-z="36" id="rim">
-            <ellipse cx="100" cy="48" rx="40" ry="24" fill="url(#gradRim)" opacity="0.0"></ellipse>
-          </g>
-          <defs>
-            <linearGradient id="gradRim" x1="0" x2="1">
-              <stop offset="0" stop-color="#ffffff" stop-opacity="0.65"/>
-              <stop offset="1" stop-color="#ffd9b0" stop-opacity="0.18"/>
-            </linearGradient>
-          </defs>
+        <!-- Упрощённая модель — можно заменить на фактический SVG/3D-модель -->
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="demo" style="display:none;">
+          <g class="layer" data-z="0"><circle cx="100" cy="90" r="48" fill="#ff8b3d" stroke="#b85b12" stroke-width="3"/></g>
+          <g class="rim layer" data-z="36" id="rim"><ellipse cx="100" cy="48" rx="40" ry="24" fill="url(#gradRim)" opacity="0.0"/></g>
+          <defs><linearGradient id="gradRim" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.65"/><stop offset="1" stop-color="#ffd9b0" stop-opacity="0.18"/></linearGradient></defs>
         </svg>
       </div>
     </div>
-    <!--
-    <div class="hint">Курсор заменён на Portal_Gunn.svg и виден на всех устройствах. Нажмите — появится GIF из частиц.</div>
-    -->
   </div>
 
-  <!-- кастомный курсор: содержимое SVG вставляется динамически из внешнего файла -->
+  <!-- кастомный курсор: загружается из внешнего SVG (Portal_Gunn.svg) -->
   <div id="cursorIcon" class="cursor-icon" aria-hidden="true" title="Portal cursor">
-    <!-- fallback inline SVG (на случай, если fetch не работает) -->
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="100" cy="100" r="48" fill="#ffb86b" stroke="#c15315" stroke-width="2" />
-    </svg>
+    <!-- fallback, если fetch SVG не сработал -->
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="100" cy="100" r="48" fill="#ffb86b" stroke="#c15315" stroke-width="2"/></svg>
   </div>
 
-  <!-- контейнер для эффектов (частицы + GIF) -->
+  <!-- контейнер для частиц и GIF -->
   <div id="clickEffectContainer" class="click-effect" aria-hidden="true"></div>
 
 <script>
-/* Обновлённый скрипт — курсор загружается из https://humanphenotype.github.io/img/Portal_Gunn.svg
-   и заменяет системный курсор на всех устройствах (desktop + mobile). */
+/*
+  Подробные комментарии внутри кода ниже.
+  Ключевые моменты:
+  - createParticle: создаёт DOM-структуру .particle > .particle-inner, настраивает цвета/формы/размеры;
+  - взрыв: outer (.particle) получает transform -> translate3d(dx,dy) с большим transition для плавности;
+  - float: внутренняя часть (particle-inner) имеет бесконечную медленную анимацию floatSmooth и shimmerSmooth;
+  - последовательность: частицы появляются -> через 220ms появляется GIF -> через 1500ms частицы собираются и исчезают.
+*/
 
-(function () {
+(function(){
+  // URL ресурсов
   const CURSOR_SVG_URL = 'https://humanphenotype.github.io/img/Portal_Gunn.svg';
   const GIF_URL = 'https://humanphenotype.github.io/img/portal1.gif';
 
+  // DOM элементы
   const viewer = document.getElementById('viewer');
   const model = document.getElementById('model');
   const layers = Array.from(model.querySelectorAll('.layer'));
@@ -164,50 +129,41 @@
   const cursorIcon = document.getElementById('cursorIcon');
   const effectContainer = document.getElementById('clickEffectContainer');
 
-  // загружаем SVG и вставляем внутрь cursorIcon (inline) для лучшей работы
-  fetch(CURSOR_SVG_URL).then(r => r.text()).then(svgText => {
-    // вставляем SVG внутрь cursorIcon
-    // удаляем возможные <script> из SVG по безопасности
-    const safe = svgText.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
-    cursorIcon.innerHTML = safe;
-    // Убедимся, что svg внутри подгоняется под контейнер
-    const svg = cursorIcon.querySelector('svg');
-    if (svg){
-      svg.setAttribute('width', '100%'); svg.setAttribute('height', '100%');
-      svg.style.display = 'block';
-      // очистим тяжёлые фильтры, если есть
-      svg.querySelectorAll('*').forEach(n => { n.style.filter = 'none'; });
-    }
-  }).catch(err => {
-    // если fetch не удался — оставляем fallback, но логируем
-    console.warn('Не удалось загрузить курсор SVG:', err);
-  });
+  // Загружаем SVG курсора как inline (DOMParser безопасно парсит SVG)
+  (function loadCursorSVG(){
+    fetch(CURSOR_SVG_URL).then(r=>r.text()).then(svgText=>{
+      try{
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(svgText, 'image/svg+xml');
+        // удаляем скрипты из SVG (безопасность)
+        doc.querySelectorAll('script').forEach(s=>s.remove());
+        // сериализуем и вставляем
+        const safe = new XMLSerializer().serializeToString(doc.documentElement);
+        cursorIcon.innerHTML = safe;
+        const svg = cursorIcon.querySelector('svg');
+        if(svg){ svg.setAttribute('width','100%'); svg.setAttribute('height','100%'); svg.style.display='block'; svg.querySelectorAll('*').forEach(n=>n.style.filter='none'); }
+      }catch(e){ console.warn('Ошибка парсинга SVG курсора', e); }
+    }).catch(err=>{ console.warn('Не удалось загрузить SVG курсора:', err); });
+  })();
 
-  // Общие параметры 3D-tilt
-  const isTouch = (('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
-  const maxTilt = 22;
-  const depthScale = 1;
-  const layerRotationFactor = 0.28;
-  const smooth = 0.12;
-  const cursorSmooth = 0.18;
-  const cursorRotateScale = 0.46;
-
-  // state
+  // Параметры tilt / cursor
+  const maxTilt = 22, depthScale = 1, layerRotationFactor = 0.28;
+  const smooth = 0.12, cursorSmooth = 0.18, cursorRotateScale = 0.46;
   const state = { targetRX:0, targetRY:0, currentRX:0, currentRY:0, left:0, top:0, width:0, height:0 };
+
   function updateBounds(){ const r = viewer.getBoundingClientRect(); state.width=r.width; state.height=r.height; state.left=r.left; state.top=r.top; }
   updateBounds(); window.addEventListener('resize', updateBounds);
 
-  let rafId = null; function scheduleRAF(){ if (!rafId) rafId = requestAnimationFrame(step); }
+  let rafId = null; function scheduleRAF(){ if(!rafId) rafId = requestAnimationFrame(step); }
 
   const cursorPos = { x: window.innerWidth/2, y: window.innerHeight/2 };
   const targetCursor = { x: cursorPos.x, y: cursorPos.y };
 
-  // показываем курсор всегда (desktop + mobile) — не прячем
+  // показываем курсор (всегда видим)
   function showCursor(){ cursorIcon.style.opacity = '1'; cursorIcon.style.display = 'grid'; }
-
-  // не прячем курсор автоматически — пользователь всегда видит кастомный курсор
   showCursor();
 
+  // обновление ориентации модели и позиции курсора
   function onPointer(clientX, clientY){
     const cx = state.left + state.width/2;
     const cy = state.top + state.height/2;
@@ -215,80 +171,171 @@
     const ny = (clientY - cy) / (state.height/2);
     const clamp = v => Math.max(-1, Math.min(1, v));
     const nxC = clamp(nx), nyC = clamp(ny);
-    state.targetRX = nyC * maxTilt * -1;
-    state.targetRY = nxC * maxTilt;
-    if (rim){ const rimOpacity = Math.min(0.95, Math.abs(nxC) * Math.abs(nyC) * 1.6 + 0.05); rim.style.opacity = String(rimOpacity); }
-    targetCursor.x = clientX; targetCursor.y = clientY;
-    scheduleRAF();
+    state.targetRX = nyC * maxTilt * -1; state.targetRY = nxC * maxTilt;
+    if(rim){ const rimOpacity = Math.min(0.95, Math.abs(nxC)*Math.abs(nyC)*1.6 + 0.02); rim.style.opacity = String(rimOpacity); }
+    targetCursor.x = clientX; targetCursor.y = clientY; scheduleRAF();
   }
 
-  window.addEventListener('mousemove', (e) => { onPointer(e.clientX, e.clientY); }, { passive:true });
-  window.addEventListener('touchstart', (e) => { if (e.touches && e.touches[0]) { const t=e.touches[0]; onPointer(t.clientX, t.clientY); } }, { passive:true });
-  window.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) { const t=e.touches[0]; onPointer(t.clientX, t.clientY); } }, { passive:true });
+  window.addEventListener('mousemove', e=>onPointer(e.clientX, e.clientY), {passive:true});
+  window.addEventListener('touchstart', e=>{ if(e.touches && e.touches[0]){ const t=e.touches[0]; onPointer(t.clientX, t.clientY); } }, {passive:true});
+  window.addEventListener('touchmove', e=>{ if(e.touches && e.touches[0]){ const t=e.touches[0]; onPointer(t.clientX, t.clientY); } }, {passive:true});
 
   function step(){
     rafId = null;
     state.currentRX += (state.targetRX - state.currentRX) * smooth;
     state.currentRY += (state.targetRY - state.currentRY) * smooth;
     model.style.transform = `rotateX(${state.currentRX}deg) rotateY(${state.currentRY}deg)`;
-    layers.forEach(el => {
-      const z = Number(el.getAttribute('data-z') || 0) * depthScale;
+    layers.forEach(el=>{
+      const z = Number(el.getAttribute('data-z')||0) * depthScale;
       const layerRX = state.currentRX * (1 + (z/100) * layerRotationFactor);
       const layerRY = state.currentRY * (1 + (z/100) * layerRotationFactor);
       el.style.transform = `translateZ(${z}px) rotateX(${layerRX}deg) rotateY(${layerRY}deg)`;
     });
 
-    // cursor lerp & transform
+    // плавный lerp курсора
     cursorPos.x += (targetCursor.x - cursorPos.x) * cursorSmooth;
     cursorPos.y += (targetCursor.y - cursorPos.y) * cursorSmooth;
-    const cRX = state.currentRX * cursorRotateScale;
-    const cRY = state.currentRY * cursorRotateScale;
+    const cRX = state.currentRX * cursorRotateScale; const cRY = state.currentRY * cursorRotateScale;
     cursorIcon.style.transform = `translate3d(${cursorPos.x}px, ${cursorPos.y}px, 0) translate3d(-50%,-50%,0) rotateX(${cRX}deg) rotateY(${cRY}deg)`;
 
     const thresh = 0.02;
-    if (Math.abs(state.targetRX - state.currentRX) > thresh || Math.abs(state.targetRY - state.currentRY) > thresh || Math.abs(targetCursor.x - cursorPos.x) > 0.6 || Math.abs(targetCursor.y - cursorPos.y) > 0.6) {
-      scheduleRAF();
-    } else {
-      state.currentRX = state.targetRX; state.currentRY = state.targetRY; cursorPos.x = targetCursor.x; cursorPos.y = targetCursor.y;
-    }
+    if(Math.abs(state.targetRX - state.currentRX) > thresh || Math.abs(state.targetRY - state.currentRY) > thresh || Math.abs(targetCursor.x - cursorPos.x) > 0.6 || Math.abs(targetCursor.y - cursorPos.y) > 0.6){ scheduleRAF(); }
+    else { state.currentRX = state.targetRX; state.currentRY = state.targetRY; cursorPos.x = targetCursor.x; cursorPos.y = targetCursor.y; }
   }
 
-  // CLICK EFFECT: particles -> GIF
-  const PARTICLE_COUNT = 20; const GIF_DURATION_MS = 3000;
+  // ----------------------
+  // Частицы и GIF
+  // ----------------------
+  const PARTICLE_COUNT = 30; // можно менять
+  const GIF_DURATION_MS = 3000; // длительность GIF
+  const PARTICLE_LINGER_MS = 1500; // удержание частиц поверх GIF
+
+  // вспомогательная функция
   function rand(min,max){ return Math.random()*(max-min)+min; }
 
+  /*
+    createParticle(x,y)
+    - создаёт DOM:
+      <div class="particle" style="left: x; top: y; width: size; height: size;">
+        <div class="particle-inner" style="background: ..."></div>
+      </div>
+    - внешний контейнер (.particle) управляет transform (взрыв/сборка) и opacity;
+    - внутренний (.particle-inner) имеет плавную анимацию floatSmooth и shimmerSmooth.
+  */
   function createParticle(x,y){
-    const p = document.createElement('div'); p.className='particle'; p.style.left = x+'px'; p.style.top = y+'px';
-    const hue = Math.floor(rand(20,42));
-    p.style.background = `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), hsla(${hue},90%,60%,0.9) 36%, hsla(${hue},80%,58%,0.65) 62%)`;
-    const angle = rand(0, Math.PI*2); const dist = rand(28,110);
-    const dx = Math.cos(angle)*dist; const dy = Math.sin(angle)*dist;
-    effectContainer.appendChild(p);
-    requestAnimationFrame(()=> { p.style.opacity='1'; p.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1)`; });
-    return p;
+    const outer = document.createElement('div'); outer.className = 'particle';
+    const inner = document.createElement('div'); inner.className = 'particle-inner';
+
+    // рандомный размер
+    const size = Math.round(rand(6,20)); outer.style.width = size + 'px'; outer.style.height = size + 'px';
+    outer.style.left = x + 'px'; outer.style.top = y + 'px';
+
+    // рандомная форма (через border-radius у inner)
+    const br = (Math.random() > 0.7) ? rand(6,50) + '%' : '50%'; inner.style.borderRadius = br;
+
+    // Цвет — подбор случайного hue и градиент
+    const hue = Math.floor(rand(180,48 + 360)) % 360; const sat = Math.floor(rand(70,95)); const lit = Math.floor(rand(48,76));
+    inner.style.background = `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), hsl(${hue}, ${sat}%, ${Math.max(45, lit-8)}%) 36%, hsl(${hue}, ${Math.max(60,sat-10)}%, ${lit}%) 62%)`;
+
+    // анимация "плавания" для inner — длительность рандомная для разнообразия
+    const floatDur = Math.round(rand(1400, 2600));
+    const shimmerDur = Math.round(rand(900, 1700));
+    inner.style.animation = `floatSmooth ${floatDur}ms ease-in-out infinite, shimmerSmooth ${shimmerDur}ms ease-in-out infinite`;
+
+    // подготовка данных взрыва
+    const angle = rand(0, Math.PI*2); const dist = rand(28, 160); const dx = Math.cos(angle)*dist; const dy = Math.sin(angle)*dist;
+    outer.dataset.dx = dx; outer.dataset.dy = dy; outer.dataset.floatDur = floatDur;
+
+    // вставляем в DOM
+    outer.appendChild(inner); effectContainer.appendChild(outer);
+
+    // небольшой rAF для начала плавного взрыва (перемещение по transform)
+    requestAnimationFrame(()=>{
+      // начнём с малой шкалы и нулевой opacity
+      outer.style.opacity = '1';
+      // применяем плавный трансформ: translate(dx,dy) — благодаря transition будет плавный вылет
+      outer.style.transform = `translate3d(-50%,-50%,0) translate3d(${dx}px, ${dy}px, 0) scale(1)`;
+    });
+
+    return outer;
   }
 
+  // создаёт GIF overlay на позиции x,y
   function createGif(x,y){
-    const overlay = document.createElement('div'); overlay.className='gif-overlay'; overlay.style.left = x+'px'; overlay.style.top = y+'px';
-    const img = document.createElement('img'); img.src = GIF_URL; img.alt='portal gif'; overlay.appendChild(img); effectContainer.appendChild(overlay);
+    const overlay = document.createElement('div'); overlay.className = 'gif-overlay'; overlay.style.left = x + 'px'; overlay.style.top = y + 'px';
+    const img = document.createElement('img'); img.src = GIF_URL; img.alt = 'portal gif'; overlay.appendChild(img);
+    effectContainer.appendChild(overlay);
     requestAnimationFrame(()=> overlay.classList.add('show'));
     return overlay;
   }
 
+  // собирает частицы и аккуратно удаляет их
+  function assembleAndRemoveParticles(particles, centerX, centerY){
+    particles.forEach(p=>{
+      // отключаем плавающую анимацию у inner
+      const inner = p.querySelector('.particle-inner'); if(inner) inner.style.animation = 'none';
+      // плавно возвращаем outer в центр и уменьшаем
+      // НЕ меняем left/top — анимация только по transform
+      p.style.transition = 'transform 700ms cubic-bezier(.16,.84,.35,1), opacity 420ms linear';
+      // переводим в центр: translate3d(-50%,-50%,0) translate3d(0,0,0) scale(0.18)
+      requestAnimationFrame(()=>{
+        p.style.transform = `translate3d(-50%,-50%,0) translate3d(0px, 0px, 0) scale(0.18)`;
+        p.style.opacity = '0';
+      });
+    });
+    // удаляем после завершения анимации
+    setTimeout(()=>{ particles.forEach(p=>{ if(p && p.parentNode) p.parentNode.removeChild(p); }); }, 760);
+  }
+
+  // основной обработчик клика
   function handleClick(clientX, clientY){
     const particles = [];
-    for (let i=0;i<PARTICLE_COUNT;i++) particles.push(createParticle(clientX, clientY));
+    for(let i=0;i<PARTICLE_COUNT;i++) particles.push(createParticle(clientX, clientY));
+
+    // через 220ms показываем GIF
     setTimeout(()=>{
       const gif = createGif(clientX, clientY);
-      particles.forEach(p=>{ p.style.transition = `transform 420ms cubic-bezier(.2,.9,.3,1), opacity 420ms linear`; p.style.transform = `translate3d(0px,0px,0) scale(0.2)`; p.style.left = clientX+'px'; p.style.top = clientY+'px'; p.style.opacity='0'; });
-      setTimeout(()=>{ if (gif){ gif.classList.remove('show'); gif.style.transition='opacity 260ms linear, transform 260ms cubic-bezier(.22,.9,.25,1)'; gif.style.opacity='0'; gif.style.transform = `translate3d(-50%,-50%,0) scale(0.6)`; } setTimeout(()=>{ particles.forEach(p=>{ if (p && p.parentNode) p.parentNode.removeChild(p); }); if (gif && gif.parentNode) gif.parentNode.removeChild(gif); },260); }, GIF_DURATION_MS);
+
+      // частицы остаются поверх GIF в течение PARTICLE_LINGER_MS
+      setTimeout(()=>{
+        // затем собираем и удаляем
+        assembleAndRemoveParticles(particles, clientX, clientY);
+      }, PARTICLE_LINGER_MS);
+
+      // GIF держим GIF_DURATION_MS, затем прячем
+      setTimeout(()=>{
+        if(gif){ gif.classList.remove('show'); gif.style.opacity='0'; gif.style.transform='translate3d(-50%,-50%,0) scale(0.6)'; }
+        setTimeout(()=>{ if(gif && gif.parentNode) gif.parentNode.removeChild(gif); }, 260);
+      }, GIF_DURATION_MS);
+
+      // запускаем звуковой плейсхолдер
+      playPortalSounds();
+
     }, 220);
   }
 
-  window.addEventListener('click', e => { handleClick(e.clientX, e.clientY); }, { passive:true });
-  window.addEventListener('touchstart', e => { if (e.touches && e.touches[0]) { const t=e.touches[0]; handleClick(t.clientX, t.clientY); onPointer(t.clientX, t.clientY); } }, { passive:true });
+  // слушатели
+  window.addEventListener('click', e=>{ handleClick(e.clientX, e.clientY); }, {passive:true});
+  window.addEventListener('touchstart', e=>{ if(e.touches && e.touches[0]){ const t=e.touches[0]; handleClick(t.clientX, t.clientY); onPointer(t.clientX, t.clientY); } }, {passive:true});
+
+  // ------------------
+  // WebAudio placeholder: короткий всплеск + фоновый рабочий тон
+  // Чтобы заменить на MP3/OGG, добавьте <audio> в DOM и проигрывайте через audio.play()
+  // ------------------
+  let audioCtx = null; let workOsc = null;
+  function initAudio(){ if(audioCtx) return; try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ console.warn('WebAudio не поддерживается', e); } }
+
+  function playPortalSounds(){ initAudio(); if(!audioCtx) return;
+    const now = audioCtx.currentTime;
+    // короткий всплеск
+    const osc = audioCtx.createOscillator(); const g = audioCtx.createGain(); osc.type='sawtooth'; osc.frequency.setValueAtTime(420, now); g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(0.28, now + 0.01); g.gain.exponentialRampToValueAtTime(0.001, now + 0.45); osc.connect(g); g.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.55);
+    // фоновый низкочастотный тон
+    if(workOsc) stopPortalWorkSound(); workOsc = audioCtx.createOscillator(); const workGain = audioCtx.createGain(); workOsc.type='sine'; workOsc.frequency.setValueAtTime(110, audioCtx.currentTime); workGain.gain.setValueAtTime(0.0, audioCtx.currentTime); workOsc.connect(workGain); workGain.connect(audioCtx.destination); workOsc.start(); workGain.gain.linearRampToValueAtTime(0.035, audioCtx.currentTime + 0.25); workOsc._gainNode = workGain; setTimeout(()=>{ stopPortalWorkSound(); }, GIF_DURATION_MS + 600);
+  }
+  function stopPortalWorkSound(){ if(!workOsc || !audioCtx) return; try{ const g = workOsc._gainNode; g.gain.cancelScheduledValues(audioCtx.currentTime); g.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35); workOsc.stop(audioCtx.currentTime + 0.36); }catch(e){ console.warn(e); } workOsc=null; }
 
 })();
 </script>
+
 </body>
 </html>
