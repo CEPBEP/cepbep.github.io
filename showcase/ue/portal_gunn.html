@@ -11,7 +11,8 @@
       <meta property="og:image" content="https://humanphenotype.github.io/img/rm.jpg" />
       <meta name="twitter:image" content="https://humanphenotype.github.io/img/rm.jpg" />
       <meta name="twitter:card" content="summary_large_image" />
-<!--
+
+ <!--
   Файл: окончательная версия эффекта портала.
 
   Что изменено по запросу:
@@ -67,15 +68,14 @@
   /* Внутренняя часть частицы — визуал, отвечает за плавающую анимацию и мерцание */
   .particle-inner{ width:100%; height:100%; border-radius:50%; overflow:hidden; will-change: transform, opacity, filter; }
 
-  /* Плавная плавающая анимация: небольшое вертикальное смещение и нежное вращение */
-  @keyframes floatSmooth { 0%{ transform: translateY(0) rotate(0deg); } 50%{ transform: translateY(-6%) rotate(180deg); } 100%{ transform: translateY(0) rotate(360deg); } }
-  @keyframes shimmerSmooth { 0%{ filter:brightness(0.9); } 50%{ filter:brightness(1.15); } 100%{ filter:brightness(0.9); } }
-
   /* GIF overlay (портал) — чуть ниже по z-index, чтобы частицы оставались поверх */
   .gif-overlay{ position:fixed; left:0; top:0; width:140px; height:140px; transform: translate3d(-50%,-50%,0) scale(0.6); opacity:0; pointer-events:none; z-index:100010; transition: transform 260ms cubic-bezier(.22,.9,.25,1), opacity 260ms linear; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.45); display:grid; place-items:center; }
   .gif-overlay img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .gif-overlay.show{ opacity:1; transform: translate3d(-50%,-50%,0) scale(1); }
+  .gif-overlay.show{ opacity:1; transform: translate3d(-50%,-50%,0) scale(1);border-radius: 100%; }
 
+    /* Плавная плавающая анимация: небольшое вертикальное смещение и нежное вращение */
+  @keyframes floatSmooth { 0%{ transform: translateY(0) rotate(0deg); } 50%{ transform: translateY(-6%) rotate(180deg); } 100%{ transform: translateY(0) rotate(360deg); } }
+  @keyframes shimmerSmooth { 0%{ filter:brightness(0.9); } 50%{ filter:brightness(1.15); } 100%{ filter:brightness(0.9); } }    
   /* Медиа-адаптация */
   @media (max-width:520px){ :root{ --cursor-size:72px; --size:260px; --max-tilt:14deg; --perspective:700px; } .gif-overlay{ width:108px; height:108px; } }
 </style>
