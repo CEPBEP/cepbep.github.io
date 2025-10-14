@@ -330,8 +330,11 @@
     // короткий всплеск
     const osc = audioCtx.createOscillator(); const g = audioCtx.createGain(); osc.type='sawtooth'; osc.frequency.setValueAtTime(420, now); g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(0.28, now + 0.01); g.gain.exponentialRampToValueAtTime(0.001, now + 0.45); osc.connect(g); g.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.55);
     // фоновый низкочастотный тон
-    if(workOsc) stopPortalWorkSound(); workOsc = audioCtx.createOscillator(); const workGain = audioCtx.createGain(); workOsc.type='sine'; workOsc.frequency.setValueAtTime(110, audioCtx.currentTime); workGain.gain.setValueAtTime(0.0, audioCtx.currentTime); workOsc.connect(workGain); workGain.connect(audioCtx.destination); workOsc.start(); workGain.gain.linearRampToValueAtTime(0.035, audioCtx.currentTime + 0.25); workOsc._gainNode = workGain; setTimeout(()=>{ stopPortalWorkSound(); }, GIF_DURATION_MS + 600);
-  }
+    // if(workOsc) stopPortalWorkSound(); workOsc = audioCtx.createOscillator(); const workGain = audioCtx.createGain(); workOsc.type='sine'; workOsc.frequency.setValueAtTime(110, audioCtx.currentTime); workGain.gain.setValueAtTime(0.0, audioCtx.currentTime); workOsc.connect(workGain); workGain.connect(audioCtx.destination); workOsc.start(); workGain.gain.linearRampToValueAtTime(0.035, audioCtx.currentTime + 0.25); workOsc._gainNode = workGain; setTimeout(()=>{ stopPortalWorkSound(); }, GIF_DURATION_MS + 600);
+    // фоновый низкочастотный тон
+    if(workOsc) stopPortalWorkSound(); workOsc = audioCtx.createOscillator(); const workGain = audioCtx.createGain(); workOsc.type='sine'; workOsc.frequency.setValueAtTime(110, audioCtx.currentTime); workGain.gain.setValueAtTime(0.0, audioCtx.currentTime); workOsc.connect(workGain); workGain.connect(audioCtx.destination); workOsc.start(); workGain.gain.linearRampToValueAtTime(0.035, audioCtx.currentTime + 0.5); workOsc._gainNode = workGain; setTimeout(()=>{ stopPortalWorkSound(); }, GIF_DURATION_MS + 600);
+ 
+                             }
   function stopPortalWorkSound(){ if(!workOsc || !audioCtx) return; try{ const g = workOsc._gainNode; g.gain.cancelScheduledValues(audioCtx.currentTime); g.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35); workOsc.stop(audioCtx.currentTime + 0.36); }catch(e){ console.warn(e); } workOsc=null; }
 
 })();
