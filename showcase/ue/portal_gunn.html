@@ -12,11 +12,10 @@
       <meta name="twitter:image" content="https://mcxa.github.io/img/rm.jpg" />
       <meta name="twitter:card" content="summary_large_image" />
 <style>
-  /* Скрываем системный курсор по всей странице */
-  body { cursor: none; margin: 0; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-
   :root { --size: 340px; --perspective: 900px; --max-tilt: 22deg; --transition: 0.12s; --cursor-size: 92px; }
+  ::-webkit-scrollbar { width: 0px; }
 
+  body { cursor: none; margin: 0; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
   body {
     min-height: 100vh;
     display: grid;
@@ -35,9 +34,9 @@
     display: grid;
     place-items: center;
     border-radius: 18px;
+    padding: 22px;
   /*background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     box-shadow: 0 8px 30px rgba(3,8,20,0.6);*/
-    padding: 22px;
   }
 
   .viewer {
@@ -56,8 +55,6 @@
     transition: transform var(--transition) ease-out;
     will-change: transform;
   }
-
-  svg { width:100%; height:100%; display:block; }
 
   .layer {
     transform-box: fill-box;
@@ -108,12 +105,10 @@
   /* частицы и GIF overlay */
   .click-effect { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 99998; }
   .particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; transform: translate(-50%, -50%) scale(0.9); opacity: 0.0; will-change: transform, opacity; }
-
-  .gif-overlay {
-    position: fixed; left: 0; top: 0; width: 140px; height: 140px; transform: translate3d(-50%,-50%,0) scale(0.6); opacity: 0; pointer-events: none; z-index: 99999; will-change: transform, opacity; transition: transform 260ms cubic-bezier(.22,.9,.25,1), opacity 260ms linear; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.45); background: transparent; display: grid; place-items: center; }
+  .gif-overlay { position: fixed; left: 0; top: 0; width: 140px; height: 140px; transform: translate3d(-50%,-50%,0) scale(0.6); opacity: 0; pointer-events: none; z-index: 99999; will-change: transform, opacity; transition: transform 260ms cubic-bezier(.22,.9,.25,1), opacity 260ms linear; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.45); background: transparent; display: grid; place-items: center; }
   .gif-overlay img { width: 100%; height: 100%; display:block; object-fit: cover; pointer-events: none; }
   .gif-overlay.show { opacity: 1; transform: translate3d(-50%,-50%,0) scale(1); }
-
+  svg { width:100%; height:100%; display:block; }
   @media (max-width:520px) { :root { --cursor-size: 72px; --size: 260px; --max-tilt: 14deg; --perspective: 700px; } .gif-overlay { width: 108px; height: 108px; } }
 </style>
 </head>
