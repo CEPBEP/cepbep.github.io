@@ -1,0 +1,847 @@
+<pre>
+/**
+ * ======================================================================
+ * КРИПТО-ФИАТНЫЙ ОБМЕННИК С ПУЛОМ ЛИКВИДНОСТИ - ПОЛНАЯ АРХИТЕКТУРА
+ * ======================================================================
+ * 
+ * ОСНОВНАЯ ИДЕЯ:
+ * 1. John Doe (и другие инвесторы) вносят свою криптовалюту в наш обменник
+ * 2. Alice и Bob (покупатели) покупают криптовалюту за фиатные деньги (доллары, евро)
+ * 3. Обменник использует крипту John Doe для продажи Alice и Bob
+ * 4. Прибыль от обмена делится: 80% John Doe, 20% платформе
+ * 5. Если у Alice/Bob остается сдача в крипте, они могут продать её обратно за фиат
+ * 
+ * ПРОСТЫМИ СЛОВАМИ:
+ * John Doe -> даёт крипту -> мы храним -> Alice/Bob покупают -> мы получаем фиат
+ * -> прибыль делим -> John Doe доволен -> Alice/Bob довольны -> мы довольны
+ */
+
+// =============================================================================
+// 1. ОСНОВНЫЕ КОНСТАНТЫ И НАСТРОЙКИ (ЧТОБЫ ПОНИМАТЬ ЦИФРЫ)
+// =============================================================================
+
+/**
+ * Это как настройки в игре - здесь мы храним все важные числа
+ */
+const CONFIG = {
+    // Комиссия, которую мы берем за каждый обмен (0.25%)
+    EXCHANGE_FEE: 0.0025,
+    
+    // Минимальная сумма для обмена ($10)
+    MIN_TRADE_AMOUNT: 10,
+    
+    // Как делим прибыль: 80% инвесторам, 20% нам
+    PROFIT_DISTRIBUTION: { 
+        PROVIDERS: 0.8,   // 80% поставщикам ликвидности (John Doe)
+        PLATFORM: 0.2     // 20% платформе (нам)
+    },
+    
+    // Начальные курсы валют (в реальной жизни они меняются)
+    INITIAL_RATES: {
+        'BTC/USD': 45000,  // 1 Биткоин = 45000 долларов
+        'ETH/USD': 3000,   // 1 Эфир = 3000 долларов
+        'USDT/USD': 1,     // 1 USDT = 1 доллар
+        'BTC/ETH': 0.066   // 1 Биткоин = 0.066 Эфира
+    },
+    
+    // Поддерживаемые валюты
+    SUPPORTED_CRYPTO: ['BTC', 'ETH', 'USDT'],  // Криптовалюты
+    SUPPORTED_FIAT: ['USD', 'EUR']             // Фиатные деньги
+};
+
+// =============================================================================
+// 2. КЛАСС КОШЕЛЬКА - КАК КОШЕЛЕК В РЕАЛЬНОЙ ЖИЗНИ
+// =============================================================================
+
+/**
+ * Представьте, что это ваш реальный кошелек, где вы храните деньги
+ * Только здесь он умеет хранить и крипту, и фиатные деньги
+ */
+class Wallet {
+    /**
+     * Создаем новый кошелек
+     * @param {string} currency - Какие деньги храним (BTC, ETH, USD, EUR)
+     * @param {number} initialBalance - Сколько денег положили сначала
+     */
+    constructor(currency, initialBalance = 0) {
+        this.currency = currency;        // Какая валюта в кошельке
+        this.balance = initialBalance;   // Сколько сейчас денег
+        this.transactionHistory = [];    // История всех операций (как в банке)
+        
+        console.log(`💼 Создан кошелек для ${currency}. Начальный баланс: ${initialBalance}`);
+    }
+    
+    /**
+     * КЛАДЕМ ДЕНЬГИ В КОШЕЛЕК (как пополнение карты)
+     * @param {number} amount - Сколько денег кладем
+     * @param {string} description - За что эти деньги (например, "Зарплата")
+     */
+    deposit(amount, description = 'Пополнение') {
+        // Проверяем, что кладем положительную сумму
+        if (amount <= 0) {
+            throw new Error('❌ Нельзя положить в кошелек 0 или отрицательное число!');
+        }
+        
+        // Добавляем деньги к балансу
+        this.balance += amount;
+        
+        // Записываем операцию в историю
+        this._addTransaction('deposit', amount, description);
+        
+        console.log(`💰 В кошелек ${this.currency} добавлено: ${amount}. Теперь там: ${this.balance}`);
+    }
+    
+    /**
+     * ЗАБИРАЕМ ДЕНЬГИ ИЗ КОШЕЛЬКА (как покупка в магазине)
+     * @param {number} amount - Сколько денег забираем
+     * @param {string} description - На что потратили
+     */
+    withdraw(amount, description = 'Снятие') {
+        // Проверяем, что сумма положительная
+        if (amount <= 0) {
+            throw new Error('❌ Нельзя снять 0 или отрицательное число!');
+        }
+        
+        // Проверяем, хватает ли денег в кошельке
+        if (this.balance < amount) {
+            throw new Error(`❌ Ой! В кошельке только ${this.balance}, а вы хотите снять ${amount}`);
+        }
+        
+        // Забираем деньги
+        this.balance -= amount;
+        
+        // Записываем в историю
+        this._addTransaction('withdraw', amount, description);
+        
+        console.log(`💸 Из кошелька ${this.currency} снято: ${amount}. Осталось: ${this.balance}`);
+    }
+    
+    /**
+     * ДОБАВЛЯЕМ ЗАПИСЬ ОБ ОПЕРАЦИИ (как в банковской выписке)
+     * Это приватный метод - его могут использовать только другие методы этого класса
+     */
+    _addTransaction(type, amount, description) {
+        const transaction = {
+            id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Уникальный ID
+            type: type,                    // Тип: deposit (положили) или withdraw (сняли)
+            amount: amount,               // Сколько денег
+            description: description,     // За что/на что
+            date: new Date(),             // Когда сделали
+            balanceAfter: this.balance    // Сколько осталось после операции
+        };
+        
+        // Добавляем запись в историю
+        this.transactionHistory.push(transaction);
+    }
+    
+    /**
+     * ПОКАЗЫВАЕМ ИНФОРМАЦИЮ О КОШЕЛЬКЕ
+     */
+    getInfo() {
+        return `💼 ${this.currency} | Баланс: ${this.balance} | Операций: ${this.transactionHistory.length}`;
+    }
+}
+
+// =============================================================================
+// 3. КЛАСС ПОЛЬЗОВАТЕЛЯ - КАК АККАУНТ В БАНКЕ
+// =============================================================================
+
+/**
+ * Это как ваш личный кабинет в банке, где есть все ваши кошельки
+ */
+class User {
+    /**
+     * СОЗДАЕМ НОВОГО ПОЛЬЗОВАТЕЛЯ
+     * @param {string} id - Уникальный номер пользователя (как номер счета в банке)
+     * @param {string} name - Имя пользователя
+     * @param {string} email - Email для уведомлений
+     * @param {string} role - Роль: 'investor' (John Doe) или 'retail' (Alice/Bob)
+     */
+    constructor(id, name, email, role = 'retail') {
+        this.id = id;                    // Уникальный ID
+        this.name = name;               // Имя
+        this.email = email;             // Email
+        this.role = role;               // Роль: investor или retail
+        this.wallets = new Map();       // Все кошельки пользователя
+        this.registrationDate = new Date(); // Дата регистрации
+        this.isVerified = false;        // Прошел ли проверку (как KYC в банке)
+        this.totalTrades = 0;           // Сколько всего обменов сделал
+        
+        console.log(`✅ Создан пользователь: ${name} (${role})`);
+    }
+    
+    /**
+     * ДОБАВЛЯЕМ КОШЕЛЕК ПОЛЬЗОВАТЕЛЮ (как открываем новый счет в банке)
+     * @param {string} currency - Для какой валюты кошелек
+     * @param {Wallet} wallet - Сам кошелек
+     */
+    addWallet(currency, wallet) {
+        this.wallets.set(currency, wallet);
+        console.log(`💰 Пользователь ${this.name} получил кошелек для ${currency}`);
+    }
+    
+    /**
+     * ПОЛУЧАЕМ КОШЕЛЕК ПО ВАЛЮТЕ (как выбираем карту для оплаты)
+     * @param {string} currency - Какая валюта нужна
+     */
+    getWallet(currency) {
+        const wallet = this.wallets.get(currency);
+        if (!wallet) {
+            throw new Error(`❌ У пользователя ${this.name} нет кошелька для ${currency}`);
+        }
+        return wallet;
+    }
+    
+    /**
+     * ПРОВЕРЯЕМ, ХВАТАЕТ ЛИ ДЕНЕГ (как перед покупкой)
+     * @param {string} currency - В какой валюте проверяем
+     * @param {number} amount - Сколько нужно
+     */
+    hasSufficientFunds(currency, amount) {
+        try {
+            const wallet = this.getWallet(currency);
+            return wallet.balance >= amount;
+        } catch (error) {
+            return false;
+        }
+    }
+    
+    /**
+     * ПОКАЗЫВАЕМ ИНФОРМАЦИЮ О ПОЛЬЗОВАТЕЛЕ
+     */
+    getInfo() {
+        const walletInfo = Array.from(this.wallets.entries())
+            .map(([currency, wallet]) => `${currency}: ${wallet.balance}`)
+            .join(', ');
+        
+        return `👤 ${this.name} (${this.role}) | Email: ${this.email} | Обменов: ${this.totalTrades} | Кошельки: ${walletInfo}`;
+    }
+}
+
+// =============================================================================
+// 4. КЛАСС ПУЛА ЛИКВИДНОСТИ - ОСНОВНОЙ БИЗНЕС
+// =============================================================================
+
+/**
+ * Это как общая касса, куда John Doe кладет свою крипту,
+ * а Alice и Bob приходят покупать эту крипту за фиатные деньги
+ */
+class LiquidityPool {
+    /**
+     * СОЗДАЕМ ПУЛ ЛИКВИДНОСТИ
+     * @param {string} baseCurrency - Основная валюта для учета (обычно USDT или USD)
+     */
+    constructor(baseCurrency = 'USDT') {
+        this.baseCurrency = baseCurrency;    // Основная валюта учета
+        this.totalLiquidity = 0;             // Сколько всего денег в пуле
+        this.providers = new Map();          // Кто дал деньги (John Doe и другие)
+        this.totalShares = 0;                // Сколько всего долей
+        this.tradingVolume = 0;              // Сколько всего обменов прошло
+        this.totalFees = 0;                  // Сколько комиссий собрали
+        this.profitHistory = [];             // История распределения прибыли
+        
+        console.log(`🌊 Создан пул ликвидности в ${baseCurrency}`);
+    }
+    
+    /**
+     * JOHN DOE ДОБАВЛЯЕТ СВОЮ КРИПТУ В ПУЛ (становится инвестором)
+     * @param {User} user - John Doe (инвестор)
+     * @param {number} amount - Сколько крипты он вносит
+     */
+    addLiquidity(user, amount) {
+        // Проверяем, что John Doe вносит положительную сумму
+        if (amount <= 0) {
+            throw new Error('❌ Нельзя внести 0 или отрицательное число!');
+        }
+        
+        // Проверяем, есть ли у John Doe столько крипты
+        if (!user.hasSufficientFunds(this.baseCurrency, amount)) {
+            throw new Error(`❌ У ${user.name} недостаточно ${this.baseCurrency}`);
+        }
+        
+        // ВЫЧИСЛЯЕМ ДОЛЮ JOHN DOE В ПУЛЕ:
+        let userShares = 0;
+        if (this.totalShares === 0) {
+            // Если John Doe первый - его доля равна его вкладу
+            userShares = amount;
+        } else {
+            // Если уже есть другие инвесторы - доля пропорциональна вкладу
+            userShares = (amount * this.totalShares) / this.totalLiquidity;
+        }
+        
+        // ОБНОВЛЯЕМ ДАННЫЕ ПУЛА:
+        // Смотрим, сколько у John Doe уже было долей
+        const currentProviderShare = this.providers.get(user.id) || 0;
+        // Добавляем новые доли
+        this.providers.set(user.id, currentProviderShare + userShares);
+        // Увеличиваем общее количество долей
+        this.totalShares += userShares;
+        // Увеличиваем общую ликвидность
+        this.totalLiquidity += amount;
+        
+        // ЗАБИРАЕМ КРИПТУ У JOHN DOE (он теперь инвестор)
+        user.getWallet(this.baseCurrency).withdraw(amount, `Внесение в пул ликвидности`);
+        
+        console.log(`💧 ${user.name} внес ${amount} ${this.baseCurrency} в пул. Получил долю: ${userShares}`);
+        console.log(`📊 Теперь в пуле: ${this.totalLiquidity} ${this.baseCurrency}`);
+    }
+    
+    /**
+     * JOHN DOE ЗАБИРАЕТ СВОЮ ДОЛЮ ИЗ ПУЛА (частично или полностью)
+     * @param {User} user - John Doe
+     * @param {number} sharePercentage - Сколько процентов своей доли забирает (от 1 до 100)
+     */
+    removeLiquidity(user, sharePercentage) {
+        // Проверяем, что процент от 1 до 100
+        if (sharePercentage <= 0 || sharePercentage > 100) {
+            throw new Error('❌ Можно забрать от 1% до 100% своей доли');
+        }
+        
+        // Проверяем, что John Doe действительно есть в пуле
+        const userShares = this.providers.get(user.id);
+        if (!userShares) {
+            throw new Error(`❌ ${user.name} не является инвестором пула`);
+        }
+        
+        // ВЫЧИСЛЯЕМ СКОЛЬКО ЗАБИРАЕМ:
+        // Сколько долей забираем
+        const sharesToWithdraw = userShares * (sharePercentage / 100);
+        // Сколько денег это в базовой валюте
+        const amountToWithdraw = (sharesToWithdraw * this.totalLiquidity) / this.totalShares;
+        
+        // ОБНОВЛЯЕМ ДАННЫЕ ПУЛА:
+        // Новое количество долей John Doe
+        const newUserShares = userShares - sharesToWithdraw;
+        if (newUserShares > 0) {
+            // Если остались доли - обновляем
+            this.providers.set(user.id, newUserShares);
+        } else {
+            // Если забрал все - удаляем из пула
+            this.providers.delete(user.id);
+        }
+        
+        // Уменьшаем общие показатели
+        this.totalShares -= sharesToWithdraw;
+        this.totalLiquidity -= amountToWithdraw;
+        
+        // ВОЗВРАЩАЕМ ДЕНЬГИ JOHN DOE
+        user.getWallet(this.baseCurrency).deposit(amountToWithdraw, `Вывод из пула ликвидности`);
+        
+        console.log(`🚰 ${user.name} вывел ${amountToWithdraw} ${this.baseCurrency} из пула (${sharePercentage}% своей доли)`);
+        console.log(`📊 Теперь в пуле: ${this.totalLiquidity} ${this.baseCurrency}`);
+    }
+    
+    /**
+     * ВЫЧИСЛЯЕМ СКОЛЬКО ПРОЦЕНТОВ ПУЛА ПРИНАДЛЕЖИТ JOHN DOE
+     * @param {User} user - John Doe
+     */
+    getUserShare(user) {
+        const userShares = this.providers.get(user.id);
+        if (!userShares) return 0;
+        
+        return (userShares / this.totalShares) * 100;
+    }
+    
+    /**
+     * РАСПРЕДЕЛЯЕМ ПРИБЫЛЬ МЕЖДУ ИНВЕСТОРАМИ И ПЛАТФОРМОЙ
+     * @param {number} totalProfit - Вся прибыль, которую нужно распределить
+     */
+    distributeProfit(totalProfit) {
+        if (totalProfit <= 0) {
+            throw new Error('❌ Прибыль должна быть больше 0!');
+        }
+        
+        console.log(`💰 Начинаем распределение прибыли: ${totalProfit} ${this.baseCurrency}`);
+        
+        // ДЕЛИМ ПРИБЫЛЬ ПО ПРАВИЛАМ:
+        // 80% - инвесторам (John Doe и другим)
+        const profitForProviders = totalProfit * CONFIG.PROFIT_DISTRIBUTION.PROVIDERS;
+        // 20% - платформе (нам)
+        const platformProfit = totalProfit * CONFIG.PROFIT_DISTRIBUTION.PLATFORM;
+        
+        // Сохраняем нашу долю
+        this.totalFees += platformProfit;
+        
+        console.log(`🎁 Инвесторам: ${profitForProviders} ${this.baseCurrency}`);
+        console.log(`🏦 Платформе: ${platformProfit} ${this.baseCurrency}`);
+        
+        // РАСПРЕДЕЛЯЕМ ПРИБЫЛЬ МЕЖДУ ИНВЕСТОРАМИ:
+        this.providers.forEach((shares, userId) => {
+            // Каждый получает долю пропорционально своей доле в пуле
+            const userProfit = (shares / this.totalShares) * profitForProviders;
+            console.log(`   👤 Инвестор ${userId} получает: ${userProfit} ${this.baseCurrency}`);
+            // В реальной системе здесь был бы перевод денег на кошелек инвестора
+        });
+        
+        // ЗАПИСЫВАЕМ В ИСТОРИЮ
+        this.profitHistory.push({
+            date: new Date(),
+            totalProfit: totalProfit,
+            providersProfit: profitForProviders,
+            platformProfit: platformProfit
+        });
+    }
+    
+    /**
+     * ПОКАЗЫВАЕМ ИНФОРМАЦИЮ О ПУЛЕ
+     */
+    getInfo() {
+        return `🌊 Пул ликвидности ${this.baseCurrency} | Объем: ${this.totalLiquidity} | Инвесторов: ${this.providers.size} | Долей: ${this.totalShares}`;
+    }
+}
+
+// =============================================================================
+// 5. КЛАСС ОБМЕННИКА - ГЛАВНЫЙ ДВИЖОК СИСТЕМЫ
+// =============================================================================
+
+/**
+ * Это как кассир в обменнике - он принимает заявки, считает курсы,
+ * и выполняет обмены между фиатом и криптой
+ */
+class Exchange {
+    /**
+     * СОЗДАЕМ ОБМЕННИК
+     */
+    constructor() {
+        // Какие валюты поддерживаем
+        this.supportedCurrencies = new Set([
+            ...CONFIG.SUPPORTED_CRYPTO,  // Криптовалюты
+            ...CONFIG.SUPPORTED_FIAT     // Фиатные деньги
+        ]);
+        
+        // Текущие курсы обмена
+        this.exchangeRates = new Map();
+        // Доступные пары для обмена (BTC/USD, ETH/EUR и т.д.)
+        this.tradingPairs = new Set();
+        // Пул ликвидности (где хранится крипта John Doe)
+        this.liquidityPool = new LiquidityPool('USDT');
+        // Общая статистика
+        this.totalTrades = 0;
+        this.dailyVolume = 0;
+        
+        // Загружаем начальные настройки
+        this._initializeRates();
+        this._initializeTradingPairs();
+        
+        console.log('🚀 Крипто-фиатный обменник запущен!');
+    }
+    
+    /**
+     * ЗАГРУЖАЕМ НАЧАЛЬНЫЕ КУРСЫ ВАЛЮТ
+     */
+    _initializeRates() {
+        // Устанавливаем курсы из настроек
+        for (const [pair, rate] of Object.entries(CONFIG.INITIAL_RATES)) {
+            this.exchangeRates.set(pair, rate);
+        }
+        
+        console.log('💹 Загружены начальные курсы валют');
+    }
+    
+    /**
+     * СОЗДАЕМ ВСЕ ВОЗМОЖНЫЕ ПАРЫ ДЛЯ ОБМЕНА
+     */
+    _initializeTradingPairs() {
+        const currencies = Array.from(this.supportedCurrencies);
+        
+        // Создаем все возможные комбинации валют
+        for (let i = 0; i < currencies.length; i++) {
+            for (let j = 0; j < currencies.length; j++) {
+                if (currencies[i] !== currencies[j]) {
+                    const pair = `${currencies[i]}/${currencies[j]}`;
+                    this.tradingPairs.add(pair);
+                }
+            }
+        }
+        
+        console.log('🔗 Созданы торговые пары:', Array.from(this.tradingPairs));
+    }
+    
+    /**
+     * ALICE И BOB ПОКУПАЮТ КРИПТУ ЗА ФИАТ
+     * @param {User} user - Alice или Bob
+     * @param {string} fromCurrency - Из какой валюты (USD, EUR)
+     * @param {string} toCurrency - В какую валюту (BTC, ETH)
+     * @param {number} amount - Сколько фиата тратят
+     */
+    buyCrypto(user, fromCurrency, toCurrency, amount) {
+        console.log(`\n🛒 ${user.name} покупает крипту: ${amount} ${fromCurrency} → ${toCurrency}`);
+        
+        // ПРОВЕРЯЕМ ВСЕ УСЛОВИЯ:
+        this._validateTrade(user, fromCurrency, toCurrency, amount);
+        
+        // ПОЛУЧАЕМ АКТУАЛЬНЫЙ КУРС:
+        const exchangeRate = this.getExchangeRate(fromCurrency, toCurrency);
+        // Сколько крипты получит пользователь
+        const cryptoAmount = amount * exchangeRate;
+        
+        // ВЫЧИСЛЯЕМ НАШУ КОМИССИЮ:
+        const fee = cryptoAmount * CONFIG.EXCHANGE_FEE;
+        // Сколько крипты получит пользователь после комиссии
+        const finalCryptoAmount = cryptoAmount - fee;
+        
+        console.log(`💱 Курс: 1 ${fromCurrency} = ${exchangeRate} ${toCurrency}`);
+        console.log(`📈 Без комиссии: ${cryptoAmount} ${toCurrency}`);
+        console.log(`💰 Наша комиссия: ${fee} ${toCurrency} (${CONFIG.EXCHANGE_FEE * 100}%)`);
+        console.log(`🎯 Итого пользователь получит: ${finalCryptoAmount} ${toCurrency}`);
+        
+        // ВЫПОЛНЯЕМ ОБМЕН:
+        // 1. Забираем фиат у пользователя
+        user.getWallet(fromCurrency).withdraw(amount, `Покупка ${toCurrency}`);
+        // 2. Даем крипту пользователю (из пула ликвидности)
+        user.getWallet(toCurrency).deposit(finalCryptoAmount, `Покупка за ${fromCurrency}`);
+        
+        // 3. Комиссию добавляем в прибыль пула
+        this.liquidityPool.totalFees += fee;
+        
+        // ОБНОВЛЯЕМ СТАТИСТИКУ:
+        user.totalTrades++;
+        this.totalTrades++;
+        this.dailyVolume += amount;
+        
+        console.log(`✅ Покупка завершена!`);
+        console.log(`📊 Баланс ${user.name}:`);
+        console.log(`   ${fromCurrency}: ${user.getWallet(fromCurrency).balance}`);
+        console.log(`   ${toCurrency}: ${user.getWallet(toCurrency).balance}`);
+        
+        return {
+            success: true,
+            spentAmount: amount,
+            receivedAmount: finalCryptoAmount,
+            exchangeRate: exchangeRate,
+            fee: fee
+        };
+    }
+    
+    /**
+     * ALICE И BOB ПРОДАЮТ КРИПТУ ОБРАТНО ЗА ФИАТ
+     * @param {User} user - Alice или Bob
+     * @param {string} fromCurrency - Какую крипту продают (BTC, ETH)
+     * @param {string} toCurrency - Какой фиат хотят получить (USD, EUR)
+     * @param {number} amount - Сколько крипты продают
+     */
+    sellCrypto(user, fromCurrency, toCurrency, amount) {
+        console.log(`\n🏪 ${user.name} продает крипту: ${amount} ${fromCurrency} → ${toCurrency}`);
+        
+        // ПРОВЕРЯЕМ ВСЕ УСЛОВИЯ:
+        this._validateTrade(user, fromCurrency, toCurrency, amount);
+        
+        // ПОЛУЧАЕМ АКТУАЛЬНЫЙ КУРС:
+        const exchangeRate = this.getExchangeRate(fromCurrency, toCurrency);
+        // Сколько фиата получит пользователь
+        const fiatAmount = amount * exchangeRate;
+        
+        // ВЫЧИСЛЯЕМ НАШУ КОМИССИЮ:
+        const fee = fiatAmount * CONFIG.EXCHANGE_FEE;
+        // Сколько фиата получит пользователь после комиссии
+        const finalFiatAmount = fiatAmount - fee;
+        
+        console.log(`💱 Курс: 1 ${fromCurrency} = ${exchangeRate} ${toCurrency}`);
+        console.log(`📈 Без комиссии: ${fiatAmount} ${toCurrency}`);
+        console.log(`💰 Наша комиссия: ${fee} ${toCurrency} (${CONFIG.EXCHANGE_FEE * 100}%)`);
+        console.log(`🎯 Итого пользователь получит: ${finalFiatAmount} ${toCurrency}`);
+        
+        // ВЫПОЛНЯЕМ ОБМЕН:
+        // 1. Забираем крипту у пользователя
+        user.getWallet(fromCurrency).withdraw(amount, `Продажа за ${toCurrency}`);
+        // 2. Даем фиат пользователю
+        user.getWallet(toCurrency).deposit(finalFiatAmount, `Продажа ${fromCurrency}`);
+        
+        // 3. Комиссию добавляем в прибыль пула
+        this.liquidityPool.totalFees += fee;
+        
+        // ОБНОВЛЯЕМ СТАТИСТИКУ:
+        user.totalTrades++;
+        this.totalTrades++;
+        this.dailyVolume += amount;
+        
+        console.log(`✅ Продажа завершена!`);
+        console.log(`📊 Баланс ${user.name}:`);
+        console.log(`   ${fromCurrency}: ${user.getWallet(fromCurrency).balance}`);
+        console.log(`   ${toCurrency}: ${user.getWallet(toCurrency).balance}`);
+        
+        return {
+            success: true,
+            soldAmount: amount,
+            receivedAmount: finalFiatAmount,
+            exchangeRate: exchangeRate,
+            fee: fee
+        };
+    }
+    
+    /**
+     * ПРОВЕРЯЕМ, МОЖНО ЛИ ВЫПОЛНИТЬ ОБМЕН
+     */
+    _validateTrade(user, fromCurrency, toCurrency, amount) {
+        // Проверяем валюты
+        if (!this.supportedCurrencies.has(fromCurrency)) {
+            throw new Error(`❌ Валюта ${fromCurrency} не поддерживается`);
+        }
+        
+        if (!this.supportedCurrencies.has(toCurrency)) {
+            throw new Error(`❌ Валюта ${toCurrency} не поддерживается`);
+        }
+        
+        // Нельзя менять одинаковые валюты
+        if (fromCurrency === toCurrency) {
+            throw new Error('❌ Нельзя обменять валюту на саму себя');
+        }
+        
+        // Проверяем минимальную сумму
+        if (amount < CONFIG.MIN_TRADE_AMOUNT) {
+            throw new Error(`❌ Минимальная сумма обмена: ${CONFIG.MIN_TRADE_AMOUNT}`);
+        }
+        
+        // Проверяем, есть ли такая торговая пара
+        const tradingPair = `${fromCurrency}/${toCurrency}`;
+        if (!this.tradingPairs.has(tradingPair)) {
+            throw new Error(`❌ Пара ${tradingPair} не доступна`);
+        }
+        
+        // Проверяем, хватает ли денег у пользователя
+        if (!user.hasSufficientFunds(fromCurrency, amount)) {
+            throw new Error(`❌ Недостаточно ${fromCurrency}. Нужно: ${amount}, есть: ${user.getWallet(fromCurrency).balance}`);
+        }
+        
+        console.log(`✅ Все проверки пройдены!`);
+    }
+    
+    /**
+     * ПОЛУЧАЕМ ТЕКУЩИЙ КУРС ОБМЕНА
+     * @param {string} fromCurrency - Из какой валюты
+     * @param {string} toCurrency - В какую валюту
+     */
+    getExchangeRate(fromCurrency, toCurrency) {
+        const directPair = `${fromCurrency}/${toCurrency}`;
+        const reversePair = `${toCurrency}/${fromCurrency}`;
+        
+        // Пробуем найти прямой курс
+        if (this.exchangeRates.has(directPair)) {
+            return this.exchangeRates.get(directPair);
+        }
+        
+        // Пробуем найти обратный курс
+        if (this.exchangeRates.has(reversePair)) {
+            return 1 / this.exchangeRates.get(reversePair);
+        }
+        
+        // Если нет прямой пары, вычисляем через USDT
+        if (fromCurrency !== 'USDT' && toCurrency !== 'USDT') {
+            const rate1 = this.getExchangeRate(fromCurrency, 'USDT');
+            const rate2 = this.getExchangeRate('USDT', toCurrency);
+            return rate1 * rate2;
+        }
+        
+        throw new Error(`❌ Не удалось найти курс для пары ${fromCurrency}/${toCurrency}`);
+    }
+    
+    /**
+     * ОБНОВЛЯЕМ КУРСЫ (в реальной системе получались бы с бирж)
+     * @param {string} pair - Валютная пара (BTC/USD)
+     * @param {number} rate - Новый курс
+     */
+    updateExchangeRate(pair, rate) {
+        if (!this.tradingPairs.has(pair)) {
+            throw new Error(`❌ Пара ${pair} не поддерживается`);
+        }
+        
+        this.exchangeRates.set(pair, rate);
+        console.log(`🔄 Обновлен курс: ${pair} = ${rate}`);
+    }
+    
+    /**
+     * ВЫПОЛНЯЕМ РАСПРЕДЕЛЕНИЕ ПРИБЫЛИ (раз в день/неделю/месяц)
+     */
+    distributeProfits() {
+        const totalProfit = this.liquidityPool.totalFees;
+        if (totalProfit > 0) {
+            console.log(`\n💰 ВРЕМЯ ДЕЛИТЬ ПРИБЫЛЬ!`);
+            this.liquidityPool.distributeProfit(totalProfit);
+            // Обнуляем накопленную прибыль после распределения
+            this.liquidityPool.totalFees = 0;
+        } else {
+            console.log('😔 Прибыли для распределения нет');
+        }
+    }
+    
+    /**
+     * ПОКАЗЫВАЕМ СТАТИСТИКУ ОБМЕННИКА
+     */
+    getStats() {
+        return {
+            totalTrades: this.totalTrades,
+            dailyVolume: this.dailyVolume,
+            supportedCurrencies: Array.from(this.supportedCurrencies),
+            tradingPairs: Array.from(this.tradingPairs),
+            liquidityPool: this.liquidityPool.getInfo(),
+            exchangeFee: CONFIG.EXCHANGE_FEE
+        };
+    }
+}
+
+// =============================================================================
+// 6. ДЕМОНСТРАЦИЯ РАБОТЫ ВСЕЙ СИСТЕМЫ
+// =============================================================================
+
+/**
+ * ЭТО КАК СЦЕНАРИЙ ИЗ РЕАЛЬНОЙ ЖИЗНИ:
+ * 1. John Doe становится инвестором
+ * 2. Alice и Bob покупают крипту
+ * 3. Bob продает остатки крипты обратно
+ * 4. Мы распределяем прибыль
+ */
+function demonstrateRealLifeScenario() {
+    console.log('='.repeat(80));
+    console.log('🎬 НАЧИНАЕМ РЕАЛЬНЫЙ СЦЕНАРИЙ РАБОТЫ ОБМЕННИКА');
+    console.log('='.repeat(80));
+    
+    // СОЗДАЕМ ОБМЕННИК
+    const exchange = new Exchange();
+    
+    // 👤 1. JOHN DOE - ИНВЕСТОР (имеет крипту и хочет на ней заработать)
+    const johnDoe = new User('investor_001', 'John Doe', 'john@crypto.com', 'investor');
+    johnDoe.addWallet('BTC', new Wallet('BTC', 2.0));      // 2 Биткоина
+    johnDoe.addWallet('ETH', new Wallet('ETH', 20.0));     // 20 Эфиров
+    johnDoe.addWallet('USDT', new Wallet('USDT', 50000));  // 50000 USDT
+    
+    // 👤 2. ALICE - ПОКУПАТЕЛЬ (хочет купить крипту за доллары)
+    const alice = new User('retail_001', 'Alice', 'alice@email.com', 'retail');
+    alice.addWallet('USD', new Wallet('USD', 5000));       // 5000 долларов
+    alice.addWallet('BTC', new Wallet('BTC', 0));          // Пока нет Биткоинов
+    alice.addWallet('ETH', new Wallet('ETH', 0));          // Пока нет Эфиров
+    
+    // 👤 3. BOB - ПОКУПАТЕЛЬ (хочет купить крипту за евро)
+    const bob = new User('retail_002', 'Bob', 'bob@email.com', 'retail');
+    bob.addWallet('EUR', new Wallet('EUR', 4000));         // 4000 евро
+    bob.addWallet('BTC', new Wallet('BTC', 0));            // Пока нет Биткоинов
+    bob.addWallet('ETH', new Wallet('ETH', 0));            // Пока нет Эфиров
+    
+    console.log('\n' + '='.repeat(50));
+    console.log('👥 ВСЕ УЧАСТНИКИ ГОТОВЫ К РАБОТЕ');
+    console.log('='.repeat(50));
+    console.log(johnDoe.getInfo());
+    console.log(alice.getInfo());
+    console.log(bob.getInfo());
+    
+    // 💧 1. JOHN DOE ВНОСИТ СВОЮ КРИПТУ В ПУЛ ЛИКВИДНОСТИ
+    console.log('\n' + '='.repeat(50));
+    console.log('💧 JOHN DOE СТАНОВИТСЯ ИНВЕСТОРОМ');
+    console.log('='.repeat(50));
+    
+    exchange.liquidityPool.addLiquidity(johnDoe, 10000);  // Вносит 10000 USDT
+    exchange.liquidityPool.addLiquidity(johnDoe, 0.5);    // Вносит 0.5 BTC
+    
+    console.log(`📊 ${exchange.liquidityPool.getInfo()}`);
+    console.log(`📈 Доля John Doe в пуле: ${exchange.liquidityPool.getUserShare(johnDoe).toFixed(2)}%`);
+    
+    // 🛒 2. ALICE ПОКУПАЕТ БИТКОИНЫ ЗА ДОЛЛАРЫ
+    console.log('\n' + '='.repeat(50));
+    console.log('🛒 ALICE ПОКУПАЕТ БИТКОИНЫ');
+    console.log('='.repeat(50));
+    
+    try {
+        const alicePurchase = exchange.buyCrypto(alice, 'USD', 'BTC', 1000);
+        console.log(`✅ Alice купила ${alicePurchase.receivedAmount} BTC за ${alicePurchase.spentAmount} USD`);
+    } catch (error) {
+        console.error('❌ Ошибка:', error.message);
+    }
+    
+    // 🛒 3. BOB ПОКУПАЕТ ЭФИРЫ ЗА ЕВРО
+    console.log('\n' + '='.repeat(50));
+    console.log('🛒 BOB ПОКУПАЕТ ЭФИРЫ');
+    console.log('='.repeat(50));
+    
+    try {
+        const bobPurchase = exchange.buyCrypto(bob, 'EUR', 'ETH', 800);
+        console.log(`✅ Bob купил ${bobPurchase.receivedAmount} ETH за ${bobPurchase.spentAmount} EUR`);
+    } catch (error) {
+        console.error('❌ Ошибка:', error.message);
+    }
+    
+    // 🏪 4. BOB ПРОДАЕТ ЧАСТЬ КРИПТЫ ОБРАТНО (У НЕГО ОСТАЛАСЬ "СДАЧА")
+    console.log('\n' + '='.repeat(50));
+    console.log('🏪 BOB ПРОДАЕТ ОСТАТКИ КРИПТЫ');
+    console.log('='.repeat(50));
+    
+    try {
+        const bobSale = exchange.sellCrypto(bob, 'ETH', 'EUR', 0.1);
+        console.log(`✅ Bob продал ${bobSale.soldAmount} ETH за ${bobSale.receivedAmount} EUR`);
+    } catch (error) {
+        console.error('❌ Ошибка:', error.message);
+    }
+    
+    // 💰 5. РАСПРЕДЕЛЯЕМ ПРИБЫЛЬ МЕЖДУ ИНВЕСТОРАМИ И ПЛАТФОРМОЙ
+    console.log('\n' + '='.repeat(50));
+    console.log('💰 РАСПРЕДЕЛЕНИЕ ПРИБЫЛИ');
+    console.log('='.repeat(50));
+    
+    exchange.distributeProfits();
+    
+    // 📊 6. ФИНАЛЬНАЯ СТАТИСТИКА
+    console.log('\n' + '='.repeat(50));
+    console.log('📊 ФИНАЛЬНЫЕ РЕЗУЛЬТАТЫ');
+    console.log('='.repeat(50));
+    
+    const stats = exchange.getStats();
+    console.log(`🔄 Всего обменов: ${stats.totalTrades}`);
+    console.log(`📈 Общий объем: ${stats.dailyVolume}`);
+    console.log(`💱 Комиссия: ${stats.exchangeFee * 100}%`);
+    console.log(`🌊 ${stats.liquidityPool}`);
+    
+    console.log('\n' + '='.repeat(50));
+    console.log('👤 ФИНАЛЬНЫЕ БАЛАНСЫ');
+    console.log('='.repeat(50));
+    console.log(johnDoe.getInfo());
+    console.log(alice.getInfo());
+    console.log(bob.getInfo());
+    
+    console.log('\n' + '='.repeat(80));
+    console.log('🎉 СЦЕНАРИЙ УСПЕШНО ЗАВЕРШЕН! ВСЕ ДОВОЛЬНЫ:');
+    console.log('   ✅ John Doe заработал на своей крипте');
+    console.log('   ✅ Alice и Bob купили крипту легко и быстро');
+    console.log('   ✅ Платформа получила свою долю прибыли');
+    console.log('='.repeat(80));
+}
+
+// =============================================================================
+// ЗАПУСКАЕМ ДЕМОНСТРАЦИЮ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+// =============================================================================
+
+// Когда страница загрузится - запускаем наш сценарий
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🖥 Страница загружена, запускаем демонстрацию...');
+    demonstrateRealLifeScenario();
+});
+
+/**
+ * =============================================================================
+ * КРАТКОЕ ОБЪЯСНЕНИЕ ДЛЯ ПОНИМАНИЯ:
+ * =============================================================================
+ * 
+ * КАК ЭТО РАБОТАЕТ В ЖИЗНИ:
+ * 
+ * 1. 👤 JOHN DOE (инвестор)
+ *    - Имеет: 2 BTC, 20 ETH, 50000 USDT
+ *    - Действует: Кладет часть в обменник чтобы заработать
+ *    - Результат: Получает 80% от прибыли с его крипты
+ * 
+ * 2. 👩 ALICE (покупатель)  
+ *    - Имеет: 5000 USD
+ *    - Действует: Покупает BTC за USD
+ *    - Результат: Получает BTC, платит небольшую комиссию
+ * 
+ * 3. 👨 BOB (покупатель)
+ *    - Имеет: 4000 EUR
+ *    - Действует: Покупает ETH за EUR, потом продает остатки
+ *    - Результат: Получает нужную крипту, может вернуть сдачу
+ * 
+ * 4. 🏦 ОБМЕННИК (мы)
+ *    - Получаем: 20% от всей прибыли
+ *    - Предоставляем: Быстрые и удобные обмены
+ * 
+ * ВСЕ ВЫИГРЫВАЮТ:
+ * - John Doe: Его крипта работает и приносит доход
+ * - Alice/Bob: Быстро покупают крипту без сложностей  
+ * - Мы: Получаем прибыль за предоставление услуги
+ */
+</pre>
