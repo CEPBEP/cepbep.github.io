@@ -39,7 +39,7 @@ Minutes = Data_Now.getMinutes();Seconds = Data_Now.getSeconds();switch (Month){
 			break;  }
 	return dt();function dt(){
 		return Day + " " + fMonth + " " + Year + ' года'+' '+ Hour + ":" + Minutes + ":" + Seconds;
-	}}var myString   = "типичные данные + "+date_time()+" + цифровой отпечаток устройства";
+	}}var myString   = "типичные данные + (уникальность момента через сочетанием значений hardware Fimgerprint и TimeStamp)" +date_time();
 var myPassword = "secretkey";var encrypted = CryptoJS.AES.encrypt(myString, myPassword);
 var decrypted = CryptoJS.AES.decrypt(encrypted, myPassword);
 var dat = encrypted.toString();class Block
